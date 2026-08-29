@@ -1,0 +1,23 @@
+.DS_Store
+.env
+.env.*
+!.env.example
+
+node_modules/
+dist/
+.cache/
+*.log
+npm-debug.log*
+
+.shopify/
+.shopifyignore.bak
+
+# Local CLI auth, preview URLs, claim URLs, visitor passwords
+.local/
+*.secret
+*.secrets.json
+
+# Editor
+.idea/
+.vscode/
+*.swp
