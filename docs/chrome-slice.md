@@ -1,6 +1,6 @@
 # Chrome and ChatGPT vertical slice
 
-Do this on the live shop: [https://shop.coraliedelpha.fr/](https://shop.coraliedelpha.fr/). Theme **Food Disclosure** is live. There is no storefront password.
+Do this on the live shop: [https://shop.coraliedelpha.fr/](https://shop.coraliedelpha.fr/). There is no storefront password.
 
 Do not use Horizon, Debut, Luna, or an Enterprise/Edu ChatGPT workspace.
 

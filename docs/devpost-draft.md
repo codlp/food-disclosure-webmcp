@@ -1,17 +1,17 @@
 # Devpost draft
 
-Public repo: https://github.com/codlp/food-disclosure-webmcp
+Public repo: https://github.com/codlp/label-check
 Tag: `v1.0.0-webmcp-submission`
 
 Do not submit until ChatGPT desktop (not Luna) is re-proved and the video is public.
 
 ## Project name
 
-TrustCart (working title). Public shop name: Harbor Pantry.
+Label Check. Public shop name: Maple & Sage.
 
 ## Elevator pitch
 
-People with food restrictions, including allergies, should be able to send a shopping agent to a grocery store. Harbor Pantry requires that agent to retrieve merchant ingredients and label statements, including missing data. Only then can Shopify’s native WebMCP cart path add a line.
+People with food restrictions, including allergies, should be able to send a shopping agent to a grocery store. Maple & Sage requires that agent to retrieve merchant ingredients and label statements, including missing data. Only then can Shopify’s native WebMCP cart path add a line.
 
 ## Inspiration
 

@@ -1,9 +1,9 @@
 {
-  "name": "food-disclosure-webmcp",
+  "name": "label-check",
   "version": "0.1.0",
   "private": true,
   "license": "MIT",
-  "description": "Evidence-gated food disclosures for Shopify WebMCP (fictional demo).",
+  "description": "Label Check: a grocery storefront where an agent must retrieve ingredients and label statements before it can add to the cart.",
   "type": "module",
   "engines": {
     "node": ">=20"

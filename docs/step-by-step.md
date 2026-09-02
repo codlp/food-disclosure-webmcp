@@ -49,7 +49,7 @@ Submit by 2 September 2026, 21:00 London. 3 September is buffer only.
 
 ## Step 3 — Theme on the owned Dev store
 
-- [x] Unpublished theme **Food Disclosure** on the owned store (not live `test-data`)
+- [x] Unpublished theme **Label Check** on the owned store (not live `test-data`)
 - [x] Harbor Pantry copy pushed
 - [x] Storefront is password-protected
 
@@ -78,10 +78,10 @@ Core path (`npm run test:webmcp`, 30 August 2026):
 
 ## Step 5 — ChatGPT vertical slice
 
-- [x] Reject → retrieve → accept in ChatGPT desktop built-in browser (30 August 2026, GPT-5.6 Sol Léger)
+- [x] Reject → retrieve → accept in ChatGPT desktop built-in browser (re-proved 2 September 2026, GPT-5.6 Sol Léger, not Luna)
 - [x] First add without retrieval rejected
-- [x] `get_product_food_disclosures` returned ingredients `Potatoes, sunflower oil, sea salt.` and `label_statements` `[]`
-- [x] Second add increased cart from 0 to 1 (Harbor Salt Potato Chips, $4.50). Cart page shows quantity 1
+- [x] `get_product_food_disclosures` returned ingredients `Potatoes, sunflower oil, sea salt.` and `label_statements` `[]` (not `null`)
+- [x] Second add increased the cart. Cart page shows Harbor Salt Potato Chips. Review panel shows retrieved facts
 
 **Gate:** done.
 
