@@ -1,6 +1,9 @@
 # Devpost draft
 
-Paste after the live URL and public repo exist. Do not submit until Steps 4 and 5 pass.
+Public repo: https://github.com/codlp/food-disclosure-webmcp
+Tag: `v1.0.0-webmcp-submission`
+
+Do not submit until ChatGPT desktop (not Luna) is re-proved and the video is public.
 
 ## Project name
 
