@@ -1,0 +1,19 @@
+mutation UpsertProduct($identifier: ProductSetIdentifiers, $input: ProductSetInput!) {
+  productSet(synchronous: true, identifier: $identifier, input: $input) {
+    product {
+      id
+      handle
+      status
+      variants(first: 5) {
+        nodes {
+          id
+        }
+      }
+    }
+    userErrors {
+      field
+      message
+      code
+    }
+  }
+}

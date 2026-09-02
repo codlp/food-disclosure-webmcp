@@ -1,0 +1,51 @@
+{
+  "identifier": {
+    "handle": "golden-tea-biscuits"
+  },
+  "input": {
+    "title": "Golden Tea Biscuits",
+    "handle": "golden-tea-biscuits",
+    "descriptionHtml": "<p>Plain biscuits for tea. Fictional packaged snack.</p>",
+    "vendor": "Harbor Pantry",
+    "productType": "Snack",
+    "status": "ACTIVE",
+    "tags": [
+      "food-disclosure-demo"
+    ],
+    "productOptions": [
+      {
+        "name": "Title",
+        "values": [
+          {
+            "name": "Default Title"
+          }
+        ]
+      }
+    ],
+    "variants": [
+      {
+        "optionValues": [
+          {
+            "optionName": "Title",
+            "name": "Default Title"
+          }
+        ],
+        "price": 4
+      }
+    ],
+    "metafields": [
+      {
+        "namespace": "custom",
+        "key": "ingredients",
+        "type": "multi_line_text_field",
+        "value": "Semolina, butter, cane sugar, baking powder, sea salt."
+      },
+      {
+        "namespace": "custom",
+        "key": "label_statements",
+        "type": "json",
+        "value": "[]"
+      }
+    ]
+  }
+}

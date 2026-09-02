@@ -1,0 +1,13 @@
+{
+  "sections": {
+    "hero": {
+      "type": "disclosure-hero",
+      "settings": {}
+    },
+    "grid": {
+      "type": "main-collection",
+      "settings": {}
+    }
+  },
+  "order": ["hero", "grid"]
+}

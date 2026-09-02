@@ -1,0 +1,21 @@
+<article class="product-page">
+  <div class="product-page__media">
+    {% render 'product-art', product: product, width: 960, height: 600 %}
+  </div>
+  <div class="product-page__detail">
+    <h1>{{ product.title }}</h1>
+    <p>{{ product.description }}</p>
+    {% render 'price', product: product %}
+    {% form 'product', product %}
+      <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+      <button type="submit" name="add" class="button">{{ 'product.add' | t }}</button>
+    {% endform %}
+  </div>
+</article>
+
+{% schema %}
+{
+  "name": "Product",
+  "settings": []
+}
+{% endschema %}

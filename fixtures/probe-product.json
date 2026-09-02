@@ -1,0 +1,9 @@
+{
+  "handle": "harbor-salt-potato-chips",
+  "title": "Harbor Salt Potato Chips",
+  "description": "Thin sliced potatoes in a sealed bag. Fictional packaged snack.",
+  "price": "4.50",
+  "ingredients": "Potatoes, sunflower oil, sea salt.",
+  "label_statements": [],
+  "expected_case": "candidate"
+}

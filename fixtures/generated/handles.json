@@ -1,0 +1,50 @@
+[
+  {
+    "handle": "harbor-salt-potato-chips",
+    "expected_case": "candidate"
+  },
+  {
+    "handle": "meadow-herb-rice-crackers",
+    "expected_case": "candidate"
+  },
+  {
+    "handle": "sunlit-chickpea-curls",
+    "expected_case": "candidate"
+  },
+  {
+    "handle": "orchard-fruit-squares",
+    "expected_case": "candidate"
+  },
+  {
+    "handle": "lantern-chocolate-bites",
+    "expected_case": "ingredient_conflict"
+  },
+  {
+    "handle": "millhouse-savory-crackers",
+    "expected_case": "ingredient_conflict"
+  },
+  {
+    "handle": "golden-tea-biscuits",
+    "expected_case": "ingredient_conflict"
+  },
+  {
+    "handle": "cedar-cocoa-nut-bar",
+    "expected_case": "label_statement_conflict"
+  },
+  {
+    "handle": "cocoa-grove-clusters",
+    "expected_case": "label_statement_conflict"
+  },
+  {
+    "handle": "hillpath-trail-mix",
+    "expected_case": "label_statements_missing"
+  },
+  {
+    "handle": "hearth-corn-chips",
+    "expected_case": "ingredients_missing"
+  },
+  {
+    "handle": "red-lentil-scoops",
+    "expected_case": "candidate"
+  }
+]

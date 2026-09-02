@@ -1,0 +1,28 @@
+<section class="search-page">
+  <h1>{{ 'search.heading' | t }}</h1>
+  <form action="{{ routes.search_url }}" method="get" role="search">
+    <label for="q">{{ 'search.label' | t }}</label>
+    <input id="q" type="search" name="q" value="{{ search.terms | escape }}">
+    <button type="submit" class="button">{{ 'search.submit' | t }}</button>
+  </form>
+  {% if search.performed %}
+    {% if search.results_count == 0 %}
+      <p>{{ 'search.empty' | t }}</p>
+    {% else %}
+      <ul>
+        {% for item in search.results %}
+          {% if item.object_type == 'product' %}
+            <li>{% render 'product-card', product: item %}</li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endif %}
+</section>
+
+{% schema %}
+{
+  "name": "Search",
+  "settings": []
+}
+{% endschema %}

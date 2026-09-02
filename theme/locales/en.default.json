@@ -1,0 +1,66 @@
+{
+  "accessibility": {
+    "skip": "Skip to content"
+  },
+  "banner": {
+    "text": "Fictional products · demonstration store · no orders are fulfilled."
+  },
+  "header": {
+    "home": "Harbor Pantry",
+    "catalog": "Snacks",
+    "cart": "Cart"
+  },
+  "hero": {
+    "kicker": "For shoppers with food restrictions",
+    "heading": "An agent can shop. It cannot skip the label.",
+    "body": "People who avoid wheat, nuts, or other ingredients cannot rely on a product title. Your agent retrieves the merchant’s ingredients and label statements—including missing fields—before it can change the live cart.",
+    "request_label": "Try this request",
+    "copy": "Copy demo request",
+    "copied": "Demo request copied",
+    "copy_failed": "Copy failed. Select the request text below.",
+    "request": "Build a snack basket under $40. Avoid wheat, barley, rye, malt, semolina, and anything with a “may contain wheat” or “may contain gluten” label statement. Do not add products with missing ingredient or label statement data.",
+    "boundary": "How the responsibility boundary works"
+  },
+  "review": {
+    "heading": "Disclosure review",
+    "disclaimer": "These are merchant-supplied facts. This site does not judge suitability or medical safety."
+  },
+  "product": {
+    "add": "Add to cart",
+    "label": "View label",
+    "price": "Price",
+    "close": "Close"
+  },
+  "cart": {
+    "heading": "Cart",
+    "empty": "Your cart is empty.",
+    "update": "Update cart",
+    "remove": "Remove",
+    "quantity": "Quantity",
+    "total": "Total",
+    "no_checkout": "Checkout is outside this demo. This store does not fulfill orders."
+  },
+  "search": {
+    "heading": "Search",
+    "label": "Search products",
+    "submit": "Search",
+    "empty": "No products matched that search."
+  },
+  "collection": {
+    "heading": "Snacks",
+    "empty": "No snacks are listed in this collection yet."
+  },
+  "footer": {
+    "notice": "Fictional demonstration products. No orders are fulfilled."
+  },
+  "not_found": {
+    "heading": "Page not found",
+    "body": "That address is not part of this demo store."
+  },
+  "password": {
+    "heading": "Harbor Pantry is a password-protected demonstration store.",
+    "body": "Enter the visitor password from the store owner. This store does not fulfill orders.",
+    "label": "Visitor password",
+    "submit": "Enter"
+  }
+}

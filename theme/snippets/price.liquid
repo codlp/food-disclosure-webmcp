@@ -1,0 +1,8 @@
+{% doc %}
+Renders a product price in the shop currency.
+@param {product} product - The product to price
+{% enddoc %}
+<p class="price">
+  <span class="visually-hidden">{{ 'product.price' | t }}</span>
+  {{ product.price | money }}
+</p>

@@ -1,0 +1,35 @@
+{
+  "name": "food-disclosure-webmcp",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "description": "Evidence-gated food disclosures for Shopify WebMCP (fictional demo).",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "build:check": "node scripts/build.mjs --check",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:webmcp": "node scripts/webmcp-chrome-slice.mjs",
+    "theme:check": "npx --yes @shopify/cli@4.7.0 theme check --path theme",
+    "generate:fixtures": "node scripts/generate-fixtures.mjs",
+    "seed:catalog": "node scripts/seed-catalog.mjs",
+    "capture:payload": "node scripts/capture-payload.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.9",
+    "@types/node": "^24.3.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  },
+  "allowScripts": {
+    "esbuild@0.25.12": true,
+    "esbuild@0.28.2": true
+  }
+}

@@ -1,0 +1,24 @@
+{% doc %}
+Renders the JSON payload of merchant food disclosures for the current catalog.
+{% enddoc %}
+<script type="application/json" id="food-disclosure-payload">
+[
+{%- assign disclosure_collection = collections['food-disclosure-demo'] -%}
+{%- for product in disclosure_collection.products -%}
+  {%- assign ingredients_mf = product.metafields.custom.ingredients -%}
+  {%- assign label_statements_mf = product.metafields.custom.label_statements -%}
+  {
+    "product_id": {{ product.id | prepend: 'gid://shopify/Product/' | json }},
+    "handle": {{ product.handle | json }},
+    "title": {{ product.title | json }},
+    "variant_ids": [
+      {%- for variant in product.variants -%}
+        {{ variant.id | prepend: 'gid://shopify/ProductVariant/' | json }}{% unless forloop.last %},{% endunless %}
+      {%- endfor -%}
+    ],
+    "ingredients": {% if ingredients_mf.type == 'multi_line_text_field' %}{{ ingredients_mf.value | json }}{% else %}null{% endif %},
+    "label_statements": {% if label_statements_mf.type == 'json' %}{{ label_statements_mf.value | json }}{% else %}null{% endif %}
+  }{% unless forloop.last %},{% endunless %}
+{%- endfor -%}
+]
+</script>

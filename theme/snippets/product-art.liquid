@@ -1,0 +1,17 @@
+{% doc %}
+Renders the generated package photo for a product handle.
+@param {product} product - The product to illustrate
+@param {number} [width] - Image width
+@param {number} [height] - Image height
+{% enddoc %}
+{%- liquid
+  assign art = product.handle | prepend: 'product-' | append: '.jpg'
+  assign art_width = width | default: 640
+  assign art_height = height | default: 480
+-%}
+<img
+  src="{{ art | asset_url }}"
+  alt="{{ product.title | escape }}"
+  width="{{ art_width }}"
+  height="{{ art_height }}"
+>

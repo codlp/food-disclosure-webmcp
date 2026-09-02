@@ -1,0 +1,30 @@
+query CollectionByHandle($identifier: CollectionIdentifierInput!) {
+  collection: collectionByIdentifier(identifier: $identifier) {
+    id
+    handle
+    title
+    products(first: 20) {
+      nodes {
+        id
+        handle
+        title
+        status
+        variants(first: 1) {
+          nodes {
+            id
+            price
+          }
+        }
+        ingredients: metafield(namespace: "custom", key: "ingredients") {
+          type
+          value
+        }
+        label_statements: metafield(namespace: "custom", key: "label_statements") {
+          type
+          value
+          jsonValue
+        }
+      }
+    }
+  }
+}

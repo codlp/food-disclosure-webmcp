@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="{{ request.locale.iso_code }}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>
+      {{ page_title }}
+      {%- if current_tags %} &ndash; tagged "{{ current_tags | join: ', ' }}"{% endif -%}
+      {%- if current_page != 1 %} &ndash; Page {{ current_page }}{% endif -%}
+      {%- unless page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless -%}
+    </title>
+    {% if page_description %}
+      <meta name="description" content="{{ page_description | escape }}">
+    {% endif %}
+    {{ 'theme.css' | asset_url | stylesheet_tag }}
+    {% render 'disclosure-data' %}
+    {% # theme-check-disable ParserBlockingScript %}
+    <script src="{{ 'disclosure-bootstrap.js' | asset_url }}"></script>
+    {% # theme-check-enable ParserBlockingScript %}
+    {{ content_for_header }}
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">{{ 'accessibility.skip' | t }}</a>
+    {% section 'announcement-bar' %}
+    {% section 'header' %}
+    <main id="main-content">
+      {{ content_for_layout }}
+    </main>
+    {% section 'disclosure-review' %}
+    {% section 'footer' %}
+    <div
+      id="food-disclosure-cart-status"
+      class="cart-status"
+      role="status"
+      aria-live="polite"
+    ></div>
+    <script src="{{ 'disclosure-ui.js' | asset_url }}" defer></script>
+  </body>
+</html>

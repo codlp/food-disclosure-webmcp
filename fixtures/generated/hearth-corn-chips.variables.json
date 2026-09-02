@@ -1,0 +1,45 @@
+{
+  "identifier": {
+    "handle": "hearth-corn-chips"
+  },
+  "input": {
+    "title": "Hearth Corn Chips",
+    "handle": "hearth-corn-chips",
+    "descriptionHtml": "<p>Corn chips with a light salt finish. Fictional packaged snack.</p>",
+    "vendor": "Harbor Pantry",
+    "productType": "Snack",
+    "status": "ACTIVE",
+    "tags": [
+      "food-disclosure-demo"
+    ],
+    "productOptions": [
+      {
+        "name": "Title",
+        "values": [
+          {
+            "name": "Default Title"
+          }
+        ]
+      }
+    ],
+    "variants": [
+      {
+        "optionValues": [
+          {
+            "optionName": "Title",
+            "name": "Default Title"
+          }
+        ],
+        "price": 3.25
+      }
+    ],
+    "metafields": [
+      {
+        "namespace": "custom",
+        "key": "label_statements",
+        "type": "json",
+        "value": "[]"
+      }
+    ]
+  }
+}

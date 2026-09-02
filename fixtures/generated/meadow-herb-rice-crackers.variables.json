@@ -1,0 +1,51 @@
+{
+  "identifier": {
+    "handle": "meadow-herb-rice-crackers"
+  },
+  "input": {
+    "title": "Meadow Herb Rice Crackers",
+    "handle": "meadow-herb-rice-crackers",
+    "descriptionHtml": "<p>Light crackers with dried garden herbs. Fictional packaged snack.</p>",
+    "vendor": "Harbor Pantry",
+    "productType": "Snack",
+    "status": "ACTIVE",
+    "tags": [
+      "food-disclosure-demo"
+    ],
+    "productOptions": [
+      {
+        "name": "Title",
+        "values": [
+          {
+            "name": "Default Title"
+          }
+        ]
+      }
+    ],
+    "variants": [
+      {
+        "optionValues": [
+          {
+            "optionName": "Title",
+            "name": "Default Title"
+          }
+        ],
+        "price": 3.75
+      }
+    ],
+    "metafields": [
+      {
+        "namespace": "custom",
+        "key": "ingredients",
+        "type": "multi_line_text_field",
+        "value": "Rice flour, sunflower oil, dried parsley, dried chives, sea salt."
+      },
+      {
+        "namespace": "custom",
+        "key": "label_statements",
+        "type": "json",
+        "value": "[]"
+      }
+    ]
+  }
+}

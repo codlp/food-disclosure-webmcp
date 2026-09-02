@@ -1,0 +1,12 @@
+query ListMetafieldDefinitions($ownerType: MetafieldOwnerType!, $namespace: String, $key: String) {
+  metafieldDefinitions(first: 20, ownerType: $ownerType, namespace: $namespace, key: $key) {
+    nodes {
+      id
+      namespace
+      key
+      type {
+        name
+      }
+    }
+  }
+}

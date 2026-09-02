@@ -1,0 +1,37 @@
+<section class="cart-page">
+  <h1>{{ 'cart.heading' | t }}</h1>
+  {% if cart.item_count == 0 %}
+    <p>{{ 'cart.empty' | t }}</p>
+  {% else %}
+    {% form 'cart', cart %}
+      <ul>
+        {% for item in cart.items %}
+          <li class="cart-line">
+            <a href="{{ item.url }}">{{ item.product.title }}</a>
+            <label>
+              {{ 'cart.quantity' | t }}
+              <input
+                type="number"
+                name="updates[]"
+                value="{{ item.quantity }}"
+                min="0"
+                aria-label="{{ 'cart.quantity' | t }}"
+              >
+            </label>
+            <a href="{{ item.url_to_remove }}">{{ 'cart.remove' | t }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+      <p>{{ 'cart.total' | t }}: {{ cart.total_price | money }}</p>
+      <button type="submit" name="update" class="button">{{ 'cart.update' | t }}</button>
+    {% endform %}
+  {% endif %}
+  <p>{{ 'cart.no_checkout' | t }}</p>
+</section>
+
+{% schema %}
+{
+  "name": "Cart",
+  "settings": []
+}
+{% endschema %}

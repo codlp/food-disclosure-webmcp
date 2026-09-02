@@ -1,0 +1,19 @@
+<header class="site-header">
+  <div class="site-header__inner">
+    <a class="site-title" href="{{ routes.root_url }}">{{ 'header.home' | t }}</a>
+    <nav aria-label="Primary">
+      <a href="{{ collections['food-disclosure-demo'].url | default: routes.root_url }}">{{ 'header.catalog' | t }}</a>
+      <a class="cart-link" href="{{ routes.cart_url }}">
+        {{ 'header.cart' | t }}
+        <span id="cart-count">{{ cart.item_count }}</span>
+      </a>
+    </nav>
+  </div>
+</header>
+
+{% schema %}
+{
+  "name": "Header",
+  "settings": []
+}
+{% endschema %}

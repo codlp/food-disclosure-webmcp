@@ -1,0 +1,30 @@
+{%- liquid
+  if request.page_type == 'collection' and collection != empty
+    assign collection_to_show = collection
+  else
+    assign collection_to_show = collections['food-disclosure-demo']
+  endif
+-%}
+<section class="product-grid">
+  {% if request.page_type == 'index' %}
+    <h2 class="product-grid__heading">{{ 'collection.heading' | t }}</h2>
+  {% else %}
+    <h1 class="product-grid__heading">{{ 'collection.heading' | t }}</h1>
+  {% endif %}
+  {% if collection_to_show.products.size == 0 %}
+    <p>{{ 'collection.empty' | t }}</p>
+  {% else %}
+    <ul>
+      {% for product in collection_to_show.products %}
+        <li>{% render 'product-card', product: product %}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+</section>
+
+{% schema %}
+{
+  "name": "Product grid",
+  "settings": []
+}
+{% endschema %}
