@@ -43,4 +43,4 @@ If ChatGPT asks you to confirm a non-read-only tool, confirm it. Do not change `
 
 Paste this demo request if needed:
 
-> Build a snack basket under $40. Avoid wheat, barley, rye, malt, semolina, and anything with a “may contain wheat” or “may contain gluten” label statement. Do not add products with missing ingredient or label statement data.
+> Build a snack basket under €40. Avoid wheat, barley, rye, malt, semolina, and anything with a “may contain wheat” or “may contain gluten” label statement. Do not add products with missing ingredient or label statement data.

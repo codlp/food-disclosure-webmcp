@@ -38,17 +38,35 @@ The store never decides whether a product is suitable. The client lists their re
 
 ## Try it
 
-1. Enable `chrome://flags/#enable-webmcp-testing` in Chrome 151 or later. Relaunch Chrome if you just changed the flag.
-2. Open [the live storefront](https://shop.coraliedelpha.fr/). There is no storefront password.
-3. On the store tab, open DevTools. Open **Application → WebMCP**. The click path is in [docs/chrome-slice.md](docs/chrome-slice.md).
-4. Confirm native commerce tools and `get_product_food_disclosures` both appear.
-5. Ask the agent to add Harbor Salt Potato Chips without retrieval. The cart must not change.
-6. Call `get_product_food_disclosures` for that product. Then retry the add. The cart must update.
-7. Retrieve Hillpath Trail Mix. Confirm `label_statements` is `null`, not `[]`.
-8. Repeat in ChatGPT desktop. Do not use the Luna model.
-9. Confirm Add without retrieval does not change the cart, including the ordinary Add button. Remove and decrease still work.
+Live shop: [https://shop.coraliedelpha.fr/](https://shop.coraliedelpha.fr/). There is no storefront password.
+
+### ChatGPT desktop
+
+Use GPT-5.6 Sol. Do not use Luna. Open the shop in that chat. Start with an empty basket. If ChatGPT asks you to confirm a non-read-only tool, confirm it.
+
+Paste these prompts in order. Do not hard-refresh the shop tab between prompt 2 and prompt 3. The receipt lives in this tab.
+
+1. `Add Harbor Salt Potato Chips to the cart. Do not retrieve ingredients or label statements.`
+   The cart must not change.
+2. `Retrieve ingredients and label statements for Harbor Salt Potato Chips with get_product_food_disclosures.`
+   The tool returns ingredients and `label_statements: []`.
+3. `Add Harbor Salt Potato Chips to the cart.`
+   Harbor Salt is in the cart.
+4. `Build a snack basket under €40. Avoid wheat, barley, rye, malt, semolina, and anything with a “may contain wheat” or “may contain gluten” label statement. Do not add products with missing ingredient or label statement data.`
+   The agent retrieves before each add. It skips wheat, malt, “may contain” lines, and missing fields.
+
+The “Do not retrieve” line in prompt 1 is required. Without it, ChatGPT often retrieves on its own and the block never shows.
 
 Harbor Salt Potato Chips has `label_statements: []`. Hillpath Trail Mix has `label_statements: null`. Those are different on purpose. `null` means the merchant did not supply the field. `[]` means the merchant supplied a record with no separate label statement.
+
+### Chrome WebMCP inspector
+
+1. Enable `chrome://flags/#enable-webmcp-testing` in Chrome 151 or later. Relaunch Chrome if you just changed the flag.
+2. Open the live shop. On that tab, open DevTools → **Application → WebMCP**. The click path is in [docs/chrome-slice.md](docs/chrome-slice.md).
+3. Confirm native commerce tools and `get_product_food_disclosures` both appear.
+4. Add Harbor Salt without retrieval. The cart must not change. Retrieve, then add. The cart must update.
+5. Retrieve Hillpath Trail Mix. Confirm `label_statements` is `null`, not `[]`.
+6. Confirm the ordinary Add button without retrieval does not change the cart. Remove and decrease still work.
 
 ## Why WebMCP
 
