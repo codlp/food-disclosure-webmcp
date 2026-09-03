@@ -1,7 +1,5 @@
 # Label Check
 
-Maple & Sage is a fictional grocery storefront for the [OpenAI WebMCP Challenge](https://webmcp.devpost.com/) (August–September 2026). Live shop: [https://shop.coraliedelpha.fr/](https://shop.coraliedelpha.fr/). Source: [github.com/codlp/label-check](https://github.com/codlp/label-check).
-
 ## Problem
 
 Great news: AI made so much progress in the last few months that we can now have agents shop online for us.
