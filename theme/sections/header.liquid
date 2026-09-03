@@ -1,11 +1,35 @@
 <header class="site-header">
   <div class="site-header__inner">
-    <a class="site-title" href="{{ routes.root_url }}">{{ 'header.home' | t }}</a>
+    <a class="brand" href="{{ routes.root_url }}">
+      <img
+        class="brand__mark"
+        src="{{ 'maple-sage-logo.png' | asset_url }}"
+        alt=""
+        width="48"
+        height="48"
+      >
+      <span class="brand__text">
+        <span class="site-title">{{ 'header.home' | t }}</span>
+      </span>
+    </a>
+    <form class="search-bar" action="{{ routes.search_url }}" method="get" role="search">
+      <label class="visually-hidden" for="header-search">{{ 'search.label' | t }}</label>
+      <input
+        id="header-search"
+        type="search"
+        name="q"
+        value="{{ search.terms | escape }}"
+        placeholder="{{ 'search.placeholder' | t }}"
+      >
+      <button type="submit" class="visually-hidden">{{ 'search.submit' | t }}</button>
+    </form>
     <nav aria-label="Primary">
-      <a href="{{ collections['food-disclosure-demo'].url | default: routes.root_url }}">{{ 'header.catalog' | t }}</a>
+      <a href="{{ routes.root_url }}#departments">{{ 'header.shop' | t }}</a>
+      <a href="{{ routes.root_url }}#assistants">{{ 'header.assistants' | t }}</a>
       <a class="cart-link" href="{{ routes.cart_url }}">
         {{ 'header.cart' | t }}
-        <span id="cart-count">{{ cart.item_count }}</span>
+        (<span id="cart-count">{{ cart.item_count }}</span>)
+        · {{ cart.total_price | money }}
       </a>
     </nav>
   </div>

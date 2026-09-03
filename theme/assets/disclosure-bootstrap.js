@@ -778,22 +778,23 @@
   function text(el, value) {
     if (el) el.textContent = value;
   }
+  function setPanelActive(root, active) {
+    root.getElementById("disclosure-review")?.classList.toggle("is-active", active);
+  }
   function show(root, state) {
     const status = root.getElementById("food-disclosure-status");
     const list = root.getElementById("food-disclosure-results");
     if (!status) return;
-    if (state.kind === "idle") {
-      text(status, "No product has been retrieved by the agent yet.");
+    if (state.kind === "idle" || state.kind === "unsupported") {
+      setPanelActive(root, false);
+      text(
+        status,
+        state.kind === "idle" ? "No product has been retrieved by the agent yet." : "Site tools are not available in this browser. You can still browse and use the human cart."
+      );
       if (list) list.replaceChildren();
       return;
     }
-    if (state.kind === "unsupported") {
-      text(
-        status,
-        "Site tools are not available in this browser. You can still browse and use the human cart."
-      );
-      return;
-    }
+    setPanelActive(root, true);
     if (state.kind === "gate_unavailable") {
       text(
         status,

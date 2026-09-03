@@ -16,10 +16,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:webmcp": "node scripts/webmcp-chrome-slice.mjs",
-    "theme:check": "npx --yes @shopify/cli@4.7.0 theme check --path theme",
-    "generate:fixtures": "node scripts/generate-fixtures.mjs",
-    "seed:catalog": "node scripts/seed-catalog.mjs",
-    "capture:payload": "node scripts/capture-payload.mjs"
+    "theme:check": "npx --yes @shopify/cli@4.7.0 theme check --path theme"
   },
   "devDependencies": {
     "esbuild": "^0.25.9",

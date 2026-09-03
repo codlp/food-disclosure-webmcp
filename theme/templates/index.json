@@ -7,7 +7,11 @@
     "grid": {
       "type": "main-collection",
       "settings": {}
+    },
+    "assistants": {
+      "type": "assistants",
+      "settings": {}
     }
   },
-  "order": ["hero", "grid"]
+  "order": ["hero", "grid", "assistants"]
 }

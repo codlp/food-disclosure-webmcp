@@ -3,15 +3,20 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    {%- assign store_name = 'header.home' | t -%}
     <title>
       {{ page_title }}
       {%- if current_tags %} &ndash; tagged "{{ current_tags | join: ', ' }}"{% endif -%}
       {%- if current_page != 1 %} &ndash; Page {{ current_page }}{% endif -%}
-      {%- unless page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless -%}
+      {%- unless page_title contains store_name %} &ndash; {{ store_name }}{% endunless -%}
     </title>
     {% if page_description %}
       <meta name="description" content="{{ page_description | escape }}">
     {% endif %}
+    {% render 'favicon' %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
     {{ 'theme.css' | asset_url | stylesheet_tag }}
     {% render 'disclosure-data' %}
     {% # theme-check-disable ParserBlockingScript %}
@@ -21,7 +26,6 @@
   </head>
   <body>
     <a class="skip-link" href="#main-content">{{ 'accessibility.skip' | t }}</a>
-    {% section 'announcement-bar' %}
     {% section 'header' %}
     <main id="main-content">
       {{ content_for_layout }}

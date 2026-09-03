@@ -35,15 +35,36 @@ The gate rejects an increase when:
 
 Human product forms still work in those cases. The UI must not imply that retrieval was recorded.
 
-## Add classification
+Shopify’s native tool may add by variant id, product handle, or search query. The gate classifies those payloads. A search `query` without a resolved variant id is rejected.
 
-Shopify’s native tool may add by variant id, product handle, or search query. The native layer is expected to resolve those inputs before it calls `updateCart`. This gate still classifies the action payload:
+## Catalog cases
 
-- variant `merchandiseId` → look up the registry by variant
-- product `handle` without a variant id → look up the registry by handle
-- search `query` without a variant id → reject. The client cannot uniquely resolve a search string.
+These 12 records are fictional. They exist so the demo can show `null`, `[]`, ingredient conflicts, and extra label statements.
 
-Phase 4 must still prove all three native add forms in Chrome.
+| Handle                    | Case                                            |
+| ------------------------- | ----------------------------------------------- |
+| harbor-salt-potato-chips  | Complete; `label_statements: []`                |
+| meadow-herb-rice-crackers | Complete                                        |
+| sunlit-chickpea-curls     | Complete                                        |
+| orchard-fruit-squares     | Complete                                        |
+| red-lentil-scoops         | Complete                                        |
+| lantern-chocolate-bites   | Ingredient includes barley malt extract         |
+| millhouse-savory-crackers | Ingredient includes wheat flour; Contains wheat |
+| golden-tea-biscuits       | Ingredient includes semolina                    |
+| cedar-cocoa-nut-bar       | May contain wheat                               |
+| cocoa-grove-clusters      | May contain gluten                              |
+| hillpath-trail-mix        | `label_statements: null`                        |
+| hearth-corn-chips         | `ingredients: null`                             |
+
+Titles and descriptions do not announce the conflict. The agent must retrieve the disclosure fields.
+
+`null` means the merchant did not supply the field. `[]` means the merchant supplied an empty label statement list. Do not collapse those two values.
+
+## Responsibility
+
+The shopper names restrictions. The merchant supplies ingredients and label statements, including missing values. The shopper’s agent compares those two inputs. The storefront only requires retrieval before a native cart increase.
+
+Do not say a snack is safe, unsafe, verified, or medically suitable. A receipt means the custom tool completed for the current page version in this tab. It does not mean the agent understood the label.
 
 ## What stays out
 

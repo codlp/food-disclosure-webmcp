@@ -3,48 +3,38 @@ Renders a product card with human add controls and a label dialog.
 @param {product} product - The product to render
 {% enddoc %}
 <article class="product-card">
-  <a href="{{ product.url }}">
+  <a class="product-card__media-link" href="{{ product.url }}">
     <div class="product-card__media">
-      {% render 'product-art', product: product, width: 640, height: 400 %}
+      {% render 'product-art', product: product, width: 640, height: 640 %}
     </div>
-    <h2>{{ product.title }}</h2>
   </a>
-  <p>{{ product.description | strip_html | truncate: 140 }}</p>
-  {% render 'price', product: product %}
+  <div class="product-card__copy">
+    <div class="product-card__title-row">
+      <h2>
+        <a href="{{ product.url }}">{{ product.title }}</a>
+      </h2>
+      <button
+        type="button"
+        class="product-card__info"
+        data-disclosure-dialog="label-{{ product.id }}"
+        aria-label="{{ 'product.label' | t }}"
+      >
+        <span aria-hidden="true">i</span>
+      </button>
+    </div>
+    <span class="product-card__meta">{{ 'collection.heading' | t }}</span>
+    <p class="product-card__note">{{ product.description | strip_html | truncate: 90 }}</p>
+  </div>
   <div class="product-card__actions">
+    {% render 'price', product: product %}
     {% form 'product', product %}
       <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
       <button type="submit" name="add" class="button">{{ 'product.add' | t }}</button>
     {% endform %}
-    <button type="button" class="button button-secondary" data-disclosure-dialog="label-{{ product.id }}">
-      {{ 'product.label' | t }}
-    </button>
   </div>
   <dialog id="label-{{ product.id }}">
     <h2>{{ product.title }}</h2>
-    <p>
-      <strong>Ingredients:</strong>
-      {% if product.metafields.custom.ingredients.type == 'multi_line_text_field' %}
-        {{ product.metafields.custom.ingredients.value }}
-      {% else %}
-        Not supplied
-      {% endif %}
-    </p>
-    <p>
-      <strong>Label statements:</strong>
-      {% if product.metafields.custom.label_statements.type == 'json' %}
-        {% if product.metafields.custom.label_statements.value.size == 0 %}
-          No separate label statement in the supplied demo record
-        {% else %}
-          {% for statement in product.metafields.custom.label_statements.value %}
-            {{ statement }}
-          {% endfor %}
-        {% endif %}
-      {% else %}
-        Not supplied
-      {% endif %}
-    </p>
-    <p>{{ 'review.disclaimer' | t }}</p>
+    {% render 'pack-label', product: product %}
     <button type="button" class="button" data-close-dialog>{{ 'product.close' | t }}</button>
   </dialog>
 </article>

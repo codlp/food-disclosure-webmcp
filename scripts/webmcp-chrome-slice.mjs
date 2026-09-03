@@ -1,11 +1,10 @@
 #!/usr/bin/env node
 /**
- * Drive the Harbor Pantry preview as a WebMCP agent (Chrome consumer API).
+ * Drive the Maple & Sage storefront as a WebMCP agent (Chrome consumer API).
  * Does not print URLs, GIDs, passwords, or cookies.
  *
- * Reads the unpublished theme preview URL from local config.
- * Optional visitor password: FOOD_DISCLOSURE_VISITOR_PASSWORD or
- * ~/.config/food-disclosure-webmcp/visitor-password
+ * Optional store URL: FOOD_DISCLOSURE_STORE_URL or
+ * ~/.config/food-disclosure-webmcp/shopify-store.env
  */
 import { spawn } from "node:child_process";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
@@ -299,8 +298,6 @@ const AGENT_SOURCE = String.raw`
         'button[name="checkout"], input[name="checkout"], a[href*="/checkout"]',
       ),
     ),
-    noCheckoutCopy: /Checkout is outside this demo/.test(document.body.innerText || ""),
-    fulfillCopy: /does not fulfill orders/.test(document.body.innerText || ""),
   });
   const humanCart = () => ({
     addForm: Boolean(document.querySelector('button[name="add"]')),
@@ -851,7 +848,7 @@ async function run() {
     }
 
     const checkout = await evaluate(ws, sessionId, `window.__foodDisclosureAgent.checkout()`);
-    if (!checkout?.checkoutControl && checkout?.noCheckoutCopy) pass("no_real_payment", checkout);
+    if (!checkout?.checkoutControl) pass("no_real_payment", checkout);
     else fail("no_real_payment", checkout);
 
     return { checks, probe: { hasTesting: probe.hasTesting, hasRegister: probe.hasRegister } };

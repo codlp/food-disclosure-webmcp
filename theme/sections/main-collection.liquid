@@ -4,22 +4,65 @@
   else
     assign collection_to_show = collections['food-disclosure-demo']
   endif
+  assign snack_count = collection_to_show.products_count | default: collection_to_show.products.size
 -%}
-<section class="product-grid">
-  {% if request.page_type == 'index' %}
-    <h2 class="product-grid__heading">{{ 'collection.heading' | t }}</h2>
-  {% else %}
-    <h1 class="product-grid__heading">{{ 'collection.heading' | t }}</h1>
-  {% endif %}
-  {% if collection_to_show.products.size == 0 %}
-    <p>{{ 'collection.empty' | t }}</p>
-  {% else %}
-    <ul>
-      {% for product in collection_to_show.products %}
-        <li>{% render 'product-card', product: product %}</li>
-      {% endfor %}
+<div id="departments" class="shop-layout">
+  <nav class="shop-nav" aria-label="{{ 'collection.departments' | t }}">
+    <span class="mono-kicker">{{ 'collection.departments' | t }}</span>
+    <ul class="shop-nav__list">
+      <li>
+        <a class="is-current" href="{{ collection_to_show.url | default: routes.root_url }}">
+          <span>{{ 'collection.all' | t }}</span>
+          <span class="shop-nav__count">{{ snack_count }}</span>
+        </a>
+      </li>
+      <li>
+        <a href="{{ collection_to_show.url | default: routes.root_url }}">
+          <span>{{ 'collection.heading' | t }}</span>
+          <span class="shop-nav__count">{{ snack_count }}</span>
+        </a>
+      </li>
     </ul>
-  {% endif %}
+  </nav>
+  <section class="product-grid">
+    <div class="product-grid__top">
+      {% if request.page_type == 'index' %}
+        <h2 class="product-grid__heading">{{ 'collection.everything' | t }}</h2>
+      {% else %}
+        <h1 class="product-grid__heading">{{ 'collection.everything' | t }}</h1>
+      {% endif %}
+      <span class="product-grid__meta">{{ 'collection.count_sort' | t: count: snack_count }}</span>
+    </div>
+    {% if snack_count == 0 %}
+      <p>{{ 'collection.empty' | t }}</p>
+    {% else %}
+      <ul>
+        {% for product in collection_to_show.products %}
+          <li>{% render 'product-card', product: product %}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </section>
+</div>
+<section class="shop-notes">
+  <div class="shop-notes__grid">
+    <div>
+      <h2 class="mono-kicker">{{ 'notes.labels_title' | t }}</h2>
+      <p>{{ 'notes.labels_body' | t }}</p>
+    </div>
+    <div>
+      <h2 class="mono-kicker">{{ 'notes.agent_title' | t }}</h2>
+      <p>{{ 'notes.agent_body' | t }}</p>
+    </div>
+    <div>
+      <h2 class="mono-kicker">{{ 'notes.human_title' | t }}</h2>
+      <p>{{ 'notes.human_body' | t }}</p>
+    </div>
+    <div>
+      <h2 class="mono-kicker">{{ 'notes.demo_title' | t }}</h2>
+      <p>{{ 'notes.demo_body' | t }}</p>
+    </div>
+  </div>
 </section>
 
 {% schema %}

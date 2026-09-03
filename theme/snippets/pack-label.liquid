@@ -1,0 +1,32 @@
+{% doc %}
+Merchant ingredients and label statements for one product.
+@param {product} product - The product to label
+{% enddoc %}
+<dl class="label-block">
+  <div>
+    <dt>{{ 'product.ingredients' | t }}</dt>
+    <dd>
+      {% if product.metafields.custom.ingredients.type == 'multi_line_text_field' %}
+        {{ product.metafields.custom.ingredients.value }}
+      {% else %}
+        {{ 'product.not_supplied' | t }}
+      {% endif %}
+    </dd>
+  </div>
+  <div>
+    <dt>{{ 'product.label_statements' | t }}</dt>
+    <dd>
+      {% if product.metafields.custom.label_statements.type == 'json' %}
+        {% if product.metafields.custom.label_statements.value.size == 0 %}
+          {{ 'product.empty_statements' | t }}
+        {% else %}
+          {% for statement in product.metafields.custom.label_statements.value %}
+            {{ statement }}
+          {% endfor %}
+        {% endif %}
+      {% else %}
+        {{ 'product.not_supplied' | t }}
+      {% endif %}
+    </dd>
+  </div>
+</dl>

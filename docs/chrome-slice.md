@@ -2,7 +2,7 @@
 
 Do this on the live shop: [https://shop.coraliedelpha.fr/](https://shop.coraliedelpha.fr/). There is no storefront password.
 
-Do not use Horizon, Debut, Luna, or an Enterprise/Edu ChatGPT workspace.
+Do not use Luna, or an Enterprise/Edu ChatGPT workspace.
 
 ## How to open the Chrome tool list
 
@@ -33,6 +33,8 @@ To run a tool in that pane: click the tool name, fill the fields, click **Run to
 9. Human Add to cart, remove, and quantity decrease still work.
 10. Checkout is not part of the demo.
 
+Harbor Salt Potato Chips has `label_statements: []`. Hillpath Trail Mix has `label_statements: null`.
+
 ## ChatGPT desktop
 
 Repeat the reject → retrieve → accept path. Prefer GPT-5.6 Sol.
@@ -42,12 +44,3 @@ If ChatGPT asks you to confirm a non-read-only tool, confirm it. Do not change `
 Paste the demo request from the storefront if needed:
 
 > Build a snack basket under $40. Avoid wheat, barley, rye, malt, semolina, and anything with a “may contain wheat” or “may contain gluten” label statement. Do not add products with missing ingredient or label statement data.
-
-Until the 12 products are seeded, only Harbor Salt Potato Chips is a live candidate. Do not expect the skip products to exist on the store yet.
-
-## Report back
-
-- Chips visible?
-- Both tool sets visible?
-- Reject then accept?
-- Human add still works?

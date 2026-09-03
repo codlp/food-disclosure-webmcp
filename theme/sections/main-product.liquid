@@ -1,6 +1,6 @@
 <article class="product-page">
   <div class="product-page__media">
-    {% render 'product-art', product: product, width: 960, height: 600 %}
+    {% render 'product-art', product: product, width: 960, height: 960 %}
   </div>
   <div class="product-page__detail">
     <h1>{{ product.title }}</h1>
@@ -10,6 +10,7 @@
       <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
       <button type="submit" name="add" class="button">{{ 'product.add' | t }}</button>
     {% endform %}
+    {% render 'pack-label', product: product %}
   </div>
 </article>
 

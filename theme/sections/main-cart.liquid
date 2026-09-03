@@ -1,32 +1,94 @@
+{%- liquid
+  assign shop_url = collections['food-disclosure-demo'].url | default: routes.root_url
+  assign cart_total = cart.total_price | money
+-%}
 <section class="cart-page">
-  <h1>{{ 'cart.heading' | t }}</h1>
+  <div class="cart-page__top">
+    <div class="cart-page__intro">
+      <a class="cart-page__back" href="{{ shop_url }}">{{ 'cart.back' | t }}</a>
+      <h1>{{ 'cart.heading' | t }}</h1>
+    </div>
+    {% if cart.item_count == 1 %}
+      <span class="cart-page__summary">{{ 'cart.summary_one' | t }}</span>
+    {% elsif cart.item_count > 1 %}
+      <span class="cart-page__summary">{{ 'cart.summary_other' | t: count: cart.item_count }}</span>
+    {% endif %}
+  </div>
+
   {% if cart.item_count == 0 %}
-    <p>{{ 'cart.empty' | t }}</p>
+    <div class="cart-empty">
+      <p class="cart-empty__heading">{{ 'cart.empty_heading' | t }}</p>
+      <p>{{ 'cart.empty' | t }}</p>
+      <a class="button" href="{{ shop_url }}">{{ 'cart.start' | t }}</a>
+    </div>
   {% else %}
-    {% form 'cart', cart %}
-      <ul>
+    <div class="cart-layout">
+      <div class="cart-lines">
+        <div class="cart-lines__head">
+          <span></span>
+          <span>{{ 'cart.item' | t }}</span>
+          <span>{{ 'cart.quantity' | t }}</span>
+          <span>{{ 'cart.line' | t }}</span>
+        </div>
         {% for item in cart.items %}
-          <li class="cart-line">
-            <a href="{{ item.url }}">{{ item.product.title }}</a>
-            <label>
-              {{ 'cart.quantity' | t }}
-              <input
-                type="number"
-                name="updates[]"
-                value="{{ item.quantity }}"
-                min="0"
-                aria-label="{{ 'cart.quantity' | t }}"
+          <article class="cart-line">
+            <a class="cart-line__media" href="{{ item.url }}" tabindex="-1" aria-hidden="true">
+              {% render 'product-art', product: item.product, width: 120, height: 120 %}
+            </a>
+            <div class="cart-line__copy">
+              <a class="cart-line__title" href="{{ item.url }}">{{ item.product.title }}</a>
+              <span class="cart-line__spec">{{ item.original_price | money }}</span>
+              <a class="cart-line__remove" href="{{ item.url_to_remove }}">{{ 'cart.remove' | t }}</a>
+            </div>
+            <div class="cart-line__qty">
+              <a
+                class="cart-line__step"
+                href="{{ routes.cart_change_url }}?line={{ forloop.index }}&amp;quantity={{ item.quantity | minus: 1 }}"
+                aria-label="{{ 'cart.decrease' | t: title: item.product.title }}"
               >
-            </label>
-            <a href="{{ item.url_to_remove }}">{{ 'cart.remove' | t }}</a>
-          </li>
+                –
+              </a>
+              <span class="cart-line__count">{{ item.quantity }}</span>
+              <a
+                class="cart-line__step"
+                href="{{ routes.cart_change_url }}?line={{ forloop.index }}&amp;quantity={{ item.quantity | plus: 1 }}"
+                aria-label="{{ 'cart.increase' | t: title: item.product.title }}"
+              >
+                +
+              </a>
+            </div>
+            <span class="cart-line__price">{{ item.final_line_price | money }}</span>
+          </article>
         {% endfor %}
-      </ul>
-      <p>{{ 'cart.total' | t }}: {{ cart.total_price | money }}</p>
-      <button type="submit" name="update" class="button">{{ 'cart.update' | t }}</button>
-    {% endform %}
+      </div>
+
+      <aside class="cart-order">
+        <div class="cart-order__card">
+          <span class="mono-kicker">{{ 'cart.order' | t }}</span>
+          <div class="cart-order__rows">
+            <div class="cart-order__row">
+              {% if cart.item_count == 1 %}
+                <span>{{ 'cart.items_one' | t }}</span>
+              {% else %}
+                <span>{{ 'cart.items_other' | t: count: cart.item_count }}</span>
+              {% endif %}
+              <span>{{ cart_total }}</span>
+            </div>
+            <div class="cart-order__row cart-order__row--total">
+              <span>{{ 'cart.total' | t }}</span>
+              <span>{{ cart_total }}</span>
+            </div>
+          </div>
+          <details class="cart-order__demo">
+            <summary class="button cart-order__place">
+              {{ 'cart.place' | t: total: cart_total }}
+            </summary>
+            <p class="cart-order__receipt">{{ 'cart.place_notice' | t }}</p>
+          </details>
+        </div>
+      </aside>
+    </div>
   {% endif %}
-  <p>{{ 'cart.no_checkout' | t }}</p>
 </section>
 
 {% schema %}

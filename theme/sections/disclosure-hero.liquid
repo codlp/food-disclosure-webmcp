@@ -1,25 +1,16 @@
 <section class="hero">
-  <div class="hero__copy">
-    <p class="hero__kicker">{{ 'hero.kicker' | t }}</p>
-    <h1>{{ 'hero.heading' | t }}</h1>
-    <p>{{ 'hero.body' | t }}</p>
-    <p>
-      <a href="#disclosure-review">{{ 'hero.boundary' | t }}</a>
-    </p>
-  </div>
-  <div class="hero__request">
-    <p class="hero__request-label">{{ 'hero.request_label' | t }}</p>
-    <p id="demo-request-text">{{ 'hero.request' | t }}</p>
-    <button
-      type="button"
-      class="button"
-      id="copy-demo-request"
-      data-label="{{ 'hero.copy' | t }}"
-      data-copied-label="{{ 'hero.copied' | t }}"
-      data-failed-label="{{ 'hero.copy_failed' | t }}"
+  <div class="hero__photo">
+    <img
+      src="{{ 'maple-sage-shopfront.jpg' | asset_url }}"
+      alt="{{ 'hero.photo_alt' | t }}"
+      width="1600"
+      height="1066"
     >
-      {{ 'hero.copy' | t }}
-    </button>
+  </div>
+  <div class="hero__inner">
+    <div class="hero__copy">
+      <h1>{{ 'hero.heading' | t }}</h1>
+    </div>
   </div>
 </section>
 

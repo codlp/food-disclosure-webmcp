@@ -52,6 +52,8 @@ Native cart actions and a custom disclosure tool share one merchant page. The st
 
 ## How it works
 
+See [docs/architecture.md](docs/architecture.md) for the gate, receipts, and catalog cases.
+
 1. The shopper goes to the shop website with a shopping agent.
 2. The shopper tells the agent which foods to avoid on this trip.
 3. The agent calls `get_product_food_disclosures` before it adds a product.
