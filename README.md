@@ -18,7 +18,11 @@ There are several issues with this:
 
 ## Vision
 
-The idea is to make it easier for people with dietary restrictions or severe allergies to shop online with AI agents. How? By giving these AI agents access to the product's full list of ingredients and disclosures so it can make an informed and safe purchased decision. 
+The idea is to make it easier for people with dietary restrictions or severe allergies to shop online with AI agents.
+
+How?
+
+By giving these AI agents access to the product's full list of ingredients and disclosures so it can make an informed and safe purchased decision. 
 
 ## Solution
 
