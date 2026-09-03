@@ -20,17 +20,18 @@
         }
       });
     }
-    document.querySelectorAll("[data-disclosure-dialog]").forEach((control) => {
-      control.addEventListener("click", () => {
-        const id = control.getAttribute("data-disclosure-dialog");
+    document.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const opener = target.closest("[data-disclosure-dialog]");
+      if (opener) {
+        const id = opener.getAttribute("data-disclosure-dialog");
         const dialog = id ? document.getElementById(id) : null;
         if (dialog instanceof HTMLDialogElement) dialog.showModal();
-      });
-    });
-    document.querySelectorAll("[data-close-dialog]").forEach((control) => {
-      control.addEventListener("click", () => {
-        control.closest("dialog")?.close();
-      });
+        return;
+      }
+      const closer = target.closest("[data-close-dialog]");
+      if (closer) closer.closest("dialog")?.close();
     });
   }
   if (document.readyState === "loading") {

@@ -905,12 +905,24 @@ main {
   min-width: 0;
 }
 
+.cart-line__title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+}
+
 .cart-line__title {
+  flex: 1;
+  min-width: 0;
   font-family: var(--serif);
   font-size: 19px;
   line-height: 1.2;
   color: var(--ink);
   text-decoration: none;
+}
+
+.cart-line__title-row .product-card__info {
+  margin: 0;
 }
 
 .cart-line__title:hover {

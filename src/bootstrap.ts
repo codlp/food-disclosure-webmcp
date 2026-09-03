@@ -5,6 +5,7 @@ import { createReceiptStore, pruneStaleReceipts } from "./receipts";
 import { executeDisclosureTool, toolContract } from "./tool";
 import type { CartSummary, DisclosureResult, UpdateCartPayload, UpdateCartResult } from "./types";
 import { EVENTS, renderReview, retrievedFromReceipts, updateCartBadge } from "./ui-state";
+import { refreshCartView } from "./cart-view";
 
 type ShopifyActions = {
   getCart?: () => Promise<CartSummary | null | undefined>;
@@ -118,6 +119,7 @@ async function boot() {
         updateCartBadge(result.cart?.totalQuantity ?? 0);
         renderReview({ kind: "accepted", quantity: result.cart?.totalQuantity ?? 0 });
         dispatch(EVENTS.accepted, result);
+        void refreshCartView();
       }
       return result;
     },
@@ -131,7 +133,7 @@ async function boot() {
   ready = true;
   deps.ready = true;
 
-  installStorefrontCartGuard({
+  const guard = installStorefrontCartGuard({
     evaluate: (raw) => evaluateVariantAdd(raw, deps),
     onBlocked: (decision) => {
       renderReview({
@@ -144,6 +146,17 @@ async function boot() {
         detail: { food_disclosure: { reason_code: decision.reason } },
       });
     },
+  });
+
+  const runReconcile = () => {
+    void guard.reconcile().then((changed) => {
+      if (changed) void refreshCartView();
+    });
+  };
+  runReconcile();
+  window.addEventListener("pageshow", runReconcile);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") runReconcile();
   });
 
   if (typeof document.modelContext?.registerTool !== "function") {

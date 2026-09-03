@@ -12,7 +12,7 @@ merchant facts → structured disclosure retrieval → shopper-agent judgment
 1. **Liquid payload.** `theme/snippets/disclosure-data.liquid` renders the current collection as JSON. Missing metafields become JSON `null`. A JSON metafield whose value is `[]` stays an empty array.
 2. **Early bootstrap.** `disclosure-bootstrap.js` loads before `{{ content_for_header }}`. It configures `Shopify.actions.updateCart` first.
 3. **Custom tool.** `get_product_food_disclosures` reads the page payload, writes a tab `sessionStorage` receipt, and updates the review panel.
-4. **Cart gate.** Increases on the native `update_cart` path, the storefront Add form, `/cart/add`, and quantity-increase controls need a current receipt for that product version. Decreases and removals pass through. The ordinary Add button is not a second path.
+4. **Cart gate.** A keep-or-increase needs a current receipt for that product version. The gate covers native `update_cart`, the Add form, `/cart/add`, `/cart/change`, `/cart/update`, cart permalinks, and in-page navigation. Decreases, removals, and `/cart/clear` pass through. After load, the gate removes lines that have no current receipt. The ordinary Add button is not a second path.
 5. **Visible review.** The review panel shows retrieved facts, missing fields, rejections, and accepted cart quantity.
 
 ## Receipt
@@ -32,6 +32,8 @@ The gate rejects an increase when:
 - the variant or handle is unknown
 - a search `query` add arrives without a resolved variant id
 - a keep-or-increase of an existing cart line without a current receipt, including when the product is already in the cart
+- a cart permalink, `/cart/change`, or `/cart/update` keep-or-increase without a current receipt
+- a `fetch`, `XHR`, form, click, `location`, or `window.open` write to those URLs without a current receipt
 
 When the gate is not active, the UI must not imply that retrieval was recorded. When the gate is active, the storefront Add control uses the same receipt. It is not a bypass.
 

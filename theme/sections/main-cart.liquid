@@ -2,7 +2,7 @@
   assign shop_url = collections['food-disclosure-demo'].url | default: routes.root_url
   assign cart_total = cart.total_price | money
 -%}
-<section class="cart-page">
+<section class="cart-page" id="cart-page">
   <div class="cart-page__top">
     <div class="cart-page__intro">
       <a class="cart-page__back" href="{{ shop_url }}">{{ 'cart.back' | t }}</a>
@@ -36,9 +36,28 @@
               {% render 'product-art', product: item.product, width: 120, height: 120 %}
             </a>
             <div class="cart-line__copy">
-              <a class="cart-line__title" href="{{ item.url }}">{{ item.product.title }}</a>
+              <div class="cart-line__title-row">
+                <a class="cart-line__title" href="{{ item.url }}">{{ item.product.title }}</a>
+                <button
+                  type="button"
+                  class="product-card__info"
+                  data-disclosure-dialog="label-cart-{{ forloop.index }}"
+                  aria-label="{{ 'product.label' | t }}"
+                >
+                  <span aria-hidden="true">i</span>
+                </button>
+              </div>
               <span class="cart-line__spec">{{ item.original_price | money }}</span>
               <a class="cart-line__remove" href="{{ item.url_to_remove }}">{{ 'cart.remove' | t }}</a>
+              <dialog id="label-cart-{{ forloop.index }}">
+                <div class="dialog__head">
+                  <h2>{{ item.product.title }}</h2>
+                  <button type="button" class="dialog-close" data-close-dialog aria-label="{{ 'product.close' | t }}">
+                    <span aria-hidden="true">×</span>
+                  </button>
+                </div>
+                {% render 'pack-label', product: item.product %}
+              </dialog>
             </div>
             <div class="cart-line__qty">
               <a

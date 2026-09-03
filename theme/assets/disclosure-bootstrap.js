@@ -682,7 +682,7 @@
     }, options?.signal);
   }
 
-  // src/storefront-gate.ts
+  // src/cart-routes.ts
   function pathnameOf(url) {
     try {
       return new URL(url, "https://shop.example/").pathname;
@@ -690,56 +690,282 @@
       return url;
     }
   }
-  function isCartAddPath(url) {
-    return /\/cart\/add(?:\.js|\.json)?$/i.test(pathnameOf(url));
+  function shopPath(url) {
+    let path = pathnameOf(url);
+    try {
+      path = decodeURIComponent(path);
+    } catch {
+    }
+    path = path.replace(/^\/[a-z]{2}(?:-[a-z]{2})?(?=\/)/i, "");
+    if (path.length > 1) path = path.replace(/\/+$/, "");
+    return path;
   }
   function variantIdFromSearchParams(params) {
     const id = params.get("id");
     return id?.trim() || void 0;
   }
-  function variantIdFromCartAddBody(body) {
-    if (body == null || body === "") return void 0;
-    if (typeof FormData !== "undefined" && body instanceof FormData) {
-      const id = body.get("id");
-      return typeof id === "string" && id.trim() ? id.trim() : void 0;
+  function asQuantity2(value) {
+    if (typeof value === "number" && Number.isFinite(value)) return value;
+    if (typeof value === "string" && value.trim() !== "") {
+      const n = Number(value);
+      if (Number.isFinite(n)) return n;
     }
-    if (typeof URLSearchParams !== "undefined" && body instanceof URLSearchParams) {
-      return variantIdFromSearchParams(body);
+    return void 0;
+  }
+  function asId(value) {
+    if (typeof value === "string" && value.trim()) return value.trim();
+    if (typeof value === "number" && Number.isFinite(value)) return String(value);
+    return void 0;
+  }
+  function uniqueIds(ids) {
+    return [...new Set(ids.filter(Boolean))];
+  }
+  function readObject(body) {
+    if (body == null || typeof body !== "object") return void 0;
+    if (Array.isArray(body)) return void 0;
+    if (typeof FormData !== "undefined" && body instanceof FormData) return void 0;
+    if (typeof URLSearchParams !== "undefined" && body instanceof URLSearchParams) return void 0;
+    return body;
+  }
+  function updatesFromRecord(raw) {
+    const rec = readObject(raw);
+    if (!rec) return void 0;
+    const out = {};
+    for (const [key, value] of Object.entries(rec)) {
+      const quantity = asQuantity2(value);
+      if (quantity === void 0) continue;
+      out[key] = quantity;
     }
-    if (typeof body === "string") {
-      try {
-        return variantIdFromCartAddBody(JSON.parse(body));
-      } catch {
-        return variantIdFromSearchParams(new URLSearchParams(body));
+    return Object.keys(out).length > 0 ? out : void 0;
+  }
+  function updatesFromParams(params) {
+    const out = {};
+    params.forEach((value, key) => {
+      const match = key.match(/^updates\[([^\]]+)\]$/i);
+      if (!match?.[1] || typeof value !== "string") return;
+      const quantity = asQuantity2(value);
+      if (quantity === void 0) return;
+      out[match[1]] = quantity;
+    });
+    return Object.keys(out).length > 0 ? out : void 0;
+  }
+  function idsFromParams(params) {
+    const ids = [];
+    const push = (value) => {
+      const id = asId(value);
+      if (id) ids.push(id);
+    };
+    if (params instanceof URLSearchParams) {
+      push(params.get("id"));
+      for (const value of params.getAll("items[][id]")) push(value);
+    } else {
+      for (const value of params.getAll("id")) push(value);
+      for (const value of params.getAll("items[][id]")) push(value);
+    }
+    return ids;
+  }
+  function idsFromRecord(rec) {
+    const ids = [];
+    const id = asId(rec.id);
+    if (id) ids.push(id);
+    const items = rec.items;
+    if (Array.isArray(items)) {
+      for (const item of items) {
+        if (!item || typeof item !== "object") continue;
+        const itemId = asId(item.id);
+        if (itemId) ids.push(itemId);
       }
     }
+    return ids;
+  }
+  function decodeBody(body) {
+    if (body == null || body === "") return void 0;
+    if (typeof FormData !== "undefined" && body instanceof FormData) return body;
+    if (typeof URLSearchParams !== "undefined" && body instanceof URLSearchParams) return body;
     if (ArrayBuffer.isView(body) || body instanceof ArrayBuffer) {
       try {
-        return variantIdFromCartAddBody(new TextDecoder().decode(body));
+        return decodeBody(new TextDecoder().decode(body));
       } catch {
         return void 0;
       }
     }
-    if (typeof body === "object") {
-      const rec = body;
-      if (typeof rec.id === "string" || typeof rec.id === "number") return String(rec.id);
-      const items = rec.items;
-      if (Array.isArray(items) && items[0] && typeof items[0] === "object") {
-        const first = items[0];
-        if (typeof first.id === "string" || typeof first.id === "number") return String(first.id);
+    if (typeof body === "string") {
+      const trimmed = body.trim();
+      if (!trimmed) return void 0;
+      try {
+        return JSON.parse(trimmed);
+      } catch {
+        return new URLSearchParams(body);
       }
+    }
+    if (typeof body === "object") return body;
+    return void 0;
+  }
+  function variantIdsFromCartAddBody(body) {
+    const decoded = decodeBody(body);
+    if (decoded == null) return [];
+    if (typeof FormData !== "undefined" && decoded instanceof FormData) {
+      return uniqueIds(idsFromParams(decoded));
+    }
+    if (typeof URLSearchParams !== "undefined" && decoded instanceof URLSearchParams) {
+      return uniqueIds(idsFromParams(decoded));
+    }
+    const rec = readObject(decoded);
+    if (rec) return uniqueIds(idsFromRecord(rec));
+    return [];
+  }
+  function changeSpecFromParams(params) {
+    const spec = {};
+    const line = asQuantity2(params instanceof URLSearchParams ? params.get("line") : params.get("line"));
+    if (line !== void 0) spec.line = line;
+    const variantId = asId(params instanceof URLSearchParams ? params.get("id") : params.get("id"));
+    if (variantId) spec.variantId = variantId;
+    const quantity = asQuantity2(
+      params instanceof URLSearchParams ? params.get("quantity") : params.get("quantity")
+    );
+    if (quantity !== void 0) spec.quantity = quantity;
+    const updates = updatesFromParams(params);
+    if (updates) spec.updates = updates;
+    return spec;
+  }
+  function changeSpecFromRecord(rec) {
+    const spec = {};
+    const line = asQuantity2(rec.line);
+    if (line !== void 0) spec.line = line;
+    const variantId = asId(rec.id);
+    if (variantId) spec.variantId = variantId;
+    const quantity = asQuantity2(rec.quantity);
+    if (quantity !== void 0) spec.quantity = quantity;
+    const updates = updatesFromRecord(rec.updates);
+    if (updates) spec.updates = updates;
+    return spec;
+  }
+  function mergeChangeSpec(base, extra) {
+    const spec = { ...base };
+    if (extra.line !== void 0) spec.line = extra.line;
+    if (extra.variantId !== void 0) spec.variantId = extra.variantId;
+    if (extra.quantity !== void 0) spec.quantity = extra.quantity;
+    if (extra.updates !== void 0) spec.updates = extra.updates;
+    return spec;
+  }
+  function changeSpecFromUrlAndBody(url, body) {
+    let spec = {};
+    try {
+      spec = mergeChangeSpec(spec, changeSpecFromParams(new URL(url, "https://shop.example/").searchParams));
+    } catch {
+    }
+    const decoded = decodeBody(body);
+    if (typeof FormData !== "undefined" && decoded instanceof FormData) {
+      return mergeChangeSpec(spec, changeSpecFromParams(decoded));
+    }
+    if (typeof URLSearchParams !== "undefined" && decoded instanceof URLSearchParams) {
+      return mergeChangeSpec(spec, changeSpecFromParams(decoded));
+    }
+    const rec = readObject(decoded);
+    if (rec) return mergeChangeSpec(spec, changeSpecFromRecord(rec));
+    return spec;
+  }
+  function isExplicitRemove(spec) {
+    if (spec.updates) {
+      const quantities = Object.values(spec.updates);
+      return quantities.length > 0 && quantities.every((quantity) => quantity === 0);
+    }
+    return spec.quantity === 0;
+  }
+  function permalinkVariantIds(path) {
+    const match = path.match(/^\/cart\/(\d+:\d+(?:,\d+:\d+)*)$/i);
+    if (!match?.[1]) return void 0;
+    return uniqueIds(match[1].split(",").map((pair) => pair.split(":")[0] ?? ""));
+  }
+  function collectAddIds(url, body) {
+    const ids = variantIdsFromCartAddBody(body);
+    try {
+      const fromUrl = variantIdFromSearchParams(new URL(url, "https://shop.example/").searchParams);
+      if (fromUrl) ids.unshift(fromUrl);
+    } catch {
+    }
+    return uniqueIds(ids);
+  }
+  function parseCartRequest(url, method = "GET", body) {
+    const verb = method.toUpperCase();
+    if (verb === "HEAD" || verb === "OPTIONS") return { type: "ignore" };
+    const path = shopPath(url);
+    const permalinkIds = permalinkVariantIds(path);
+    if (permalinkIds) return { type: "check", variantIds: permalinkIds };
+    if (/\/cart\/clear(?:\.js|\.json)?$/i.test(path)) return { type: "allow" };
+    if (/\/cart\/add(?:\.js|\.json)?$/i.test(path)) {
+      return { type: "check", variantIds: collectAddIds(url, body) };
+    }
+    if (/\/cart\/(?:change|update)(?:\.js|\.json)?$/i.test(path)) {
+      const spec = changeSpecFromUrlAndBody(url, body);
+      if (isExplicitRemove(spec)) return { type: "allow" };
+      return { type: "mutate", spec };
+    }
+    return { type: "ignore" };
+  }
+  function cartLineIdForChange(item) {
+    return item.key || String(item.variant_id ?? item.id);
+  }
+  function variantIdOf(item) {
+    return String(item.variant_id ?? item.id);
+  }
+  function findCartItem(cart, spec, updateKey) {
+    if (updateKey) {
+      const byKey = cart.items.find((item) => item.key === updateKey);
+      if (byKey) return byKey;
+      const byId = cart.items.find(
+        (item) => String(item.id) === updateKey || String(item.variant_id) === updateKey
+      );
+      if (byId) return byId;
+      const prefix = updateKey.split(":")[0] ?? updateKey;
+      return cart.items.find((item) => variantIdOf(item) === prefix);
+    }
+    if (spec.line != null) return cart.items[spec.line - 1];
+    if (spec.variantId) {
+      return cart.items.find((item) => variantIdOf(item) === spec.variantId);
     }
     return void 0;
   }
+  function planMutate(spec, cart) {
+    if (spec.updates) {
+      const ids = [];
+      for (const [key, quantity] of Object.entries(spec.updates)) {
+        if (quantity === 0) continue;
+        const item2 = findCartItem(cart, spec, key);
+        if (!item2) {
+          ids.push(key.split(":")[0] || key);
+          continue;
+        }
+        if (quantity < item2.quantity) continue;
+        ids.push(variantIdOf(item2));
+      }
+      return ids.length > 0 ? { type: "check", variantIds: uniqueIds(ids) } : { type: "allow" };
+    }
+    if (spec.quantity === 0) return { type: "allow" };
+    const item = findCartItem(cart, spec);
+    if (spec.quantity != null && item && spec.quantity < item.quantity) return { type: "allow" };
+    const variantId = spec.variantId || (item ? variantIdOf(item) : void 0);
+    return { type: "check", variantIds: variantId ? [variantId] : [] };
+  }
+  function resolveCartRequest(parsed, cart) {
+    if (parsed.type === "ignore" || parsed.type === "allow") return { type: "allow" };
+    if (parsed.type === "check") return parsed;
+    if (!cart) return { type: "check", variantIds: [] };
+    return planMutate(parsed.spec, cart);
+  }
+
+  // src/storefront-gate.ts
   function requestHref(input) {
     if (typeof input === "string") return input;
     if (input instanceof URL) return input.href;
     return input.url;
   }
   function isProductAddForm(form) {
+    if (form.querySelector('[name="add"]')) return true;
     const action = form.getAttribute("action") || form.action || "";
-    if (isCartAddPath(action)) return true;
-    return Boolean(form.querySelector('[name="add"]'));
+    const method = (form.getAttribute("method") || form.method || "POST").toUpperCase();
+    const parsed = parseCartRequest(action, method);
+    return parsed.type !== "ignore";
   }
   function variantIdFromForm(form) {
     const input = form.querySelector(
@@ -748,15 +974,22 @@
     const value = input?.value?.trim();
     return value || void 0;
   }
+  var BLOCKED_JSON = {
+    status: 422,
+    message: "DISCLOSURE_RETRIEVAL_REQUIRED",
+    description: "Retrieve this product's current ingredient and label statements with get_product_food_disclosures, then retry the cart update."
+  };
+  function unknownDecision() {
+    return {
+      ok: false,
+      reason: "UNKNOWN_PRODUCT_VARIANT",
+      field: ["id"],
+      message: "Retrieve this product's current ingredient and label statements with get_product_food_disclosures, then retry the cart update."
+    };
+  }
   async function decide(raw, options) {
     if (!raw) {
-      const decision2 = {
-        ok: false,
-        reason: "UNKNOWN_PRODUCT_VARIANT",
-        field: ["id"],
-        message: "Retrieve this product's current ingredient and label statements with get_product_food_disclosures, then retry the cart update."
-      };
-      options.onBlocked(decision2);
+      options.onBlocked(unknownDecision());
       return false;
     }
     const decision = await options.evaluate(raw);
@@ -766,6 +999,73 @@
     }
     return true;
   }
+  async function decideAll(ids, options) {
+    if (ids.length === 0) return decide(void 0, options);
+    for (const id of ids) {
+      if (!await decide(id, options)) return false;
+    }
+    return true;
+  }
+  function blockedResponse() {
+    return new Response(JSON.stringify(BLOCKED_JSON), {
+      status: 422,
+      headers: { "Content-Type": "application/json" }
+    });
+  }
+  async function readCartSnapshot(nativeFetch) {
+    try {
+      const response = await nativeFetch("/cart.js", {
+        credentials: "same-origin",
+        cache: "no-store"
+      });
+      if (!response.ok) return null;
+      const data = await response.json();
+      if (!data || !Array.isArray(data.items)) return null;
+      return data;
+    } catch {
+      return null;
+    }
+  }
+  async function allowParsed(parsed, options, nativeFetch) {
+    if (parsed.type === "ignore" || parsed.type === "allow") return true;
+    const cart = parsed.type === "mutate" ? await readCartSnapshot(nativeFetch) : null;
+    const resolved = resolveCartRequest(parsed, cart);
+    if (resolved.type === "allow") return true;
+    return decideAll(resolved.variantIds, options);
+  }
+  async function stripUnauthorizedCartLines(nativeFetch, evaluate) {
+    const cart = await readCartSnapshot(nativeFetch);
+    if (!cart || cart.items.length === 0) return false;
+    let changed = false;
+    for (const item of cart.items) {
+      const variantId = String(item.variant_id ?? item.id);
+      const decision = await evaluate(variantId);
+      if (decision.ok) continue;
+      try {
+        const lineId = cartLineIdForChange(item);
+        const response = await nativeFetch("/cart/change.js", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: lineId, quantity: 0 })
+        });
+        if (response.ok) changed = true;
+      } catch {
+      }
+    }
+    return changed;
+  }
+  async function bodyFromFetch(input, init) {
+    if (init?.body) return init.body;
+    if (input instanceof Request) {
+      try {
+        return await input.clone().text();
+      } catch {
+        return void 0;
+      }
+    }
+    return void 0;
+  }
   function installStorefrontCartGuard(options) {
     const allowedForms = /* @__PURE__ */ new WeakSet();
     const nativeSubmit = HTMLFormElement.prototype.submit;
@@ -774,12 +1074,34 @@
     const xhrOpen = XMLHttpRequest.prototype.open;
     const xhrSend = XMLHttpRequest.prototype.send;
     const xhrUrl = /* @__PURE__ */ new WeakMap();
+    const xhrMethod = /* @__PURE__ */ new WeakMap();
+    const nativeAssignFn = Location.prototype.assign;
+    const nativeReplaceFn = Location.prototype.replace;
+    const hrefDesc = Object.getOwnPropertyDescriptor(Location.prototype, "href");
+    const nativeOpen = window.open.bind(window);
+    const nativeBeacon = navigator.sendBeacon?.bind(navigator);
+    let queue2 = Promise.resolve();
+    function serialize(fn) {
+      const run = queue2.then(fn, fn);
+      queue2 = run.then(
+        () => void 0,
+        () => void 0
+      );
+      return run;
+    }
+    function gatedParse(url, method, body) {
+      return parseCartRequest(url, method, body);
+    }
     async function submitIfAllowed(form) {
       if (!isProductAddForm(form)) {
         nativeSubmit.call(form);
         return;
       }
-      const allowed = await decide(variantIdFromForm(form), options);
+      const action = form.getAttribute("action") || form.action || "";
+      const method = (form.getAttribute("method") || form.method || "POST").toUpperCase();
+      const allowed = form.querySelector('[name="add"]') ? await serialize(() => decide(variantIdFromForm(form), options)) : await serialize(
+        () => allowParsed(gatedParse(action, method, new FormData(form)), options, nativeFetch)
+      );
       if (!allowed) return;
       allowedForms.add(form);
       try {
@@ -787,6 +1109,16 @@
       } finally {
         allowedForms.delete(form);
       }
+    }
+    function interceptNavigation(url, proceed) {
+      const parsed = gatedParse(url, "GET");
+      if (parsed.type === "ignore" || parsed.type === "allow") {
+        proceed();
+        return;
+      }
+      void serialize(() => allowParsed(parsed, options, nativeFetch)).then((allowed) => {
+        if (allowed) proceed();
+      });
     }
     HTMLFormElement.prototype.submit = function() {
       if (allowedForms.has(this) || !isProductAddForm(this)) {
@@ -831,68 +1163,52 @@
           const raw = increase.getAttribute("data-cart-increase")?.trim();
           event.preventDefault();
           event.stopImmediatePropagation();
-          void decide(raw, options).then((allowed) => {
-            if (allowed && increase.href) window.location.assign(increase.href);
+          void serialize(() => decide(raw, options)).then((allowed) => {
+            if (allowed && increase.href) nativeAssignFn.call(window.location, increase.href);
           });
           return;
         }
-        const addLink = target.closest("a[href]");
-        if (addLink?.href && isCartAddPath(addLink.href)) {
-          event.preventDefault();
-          event.stopImmediatePropagation();
-          const raw = variantIdFromSearchParams(new URL(addLink.href, window.location.href).searchParams) ?? addLink.getAttribute("data-variant-id") ?? void 0;
-          void decide(raw, options).then((allowed) => {
-            if (allowed) window.location.assign(addLink.href);
-          });
-        }
+        const link = target.closest("a[href]");
+        if (!link?.href) return;
+        const parsed = gatedParse(link.href, "GET");
+        if (parsed.type === "ignore" || parsed.type === "allow") return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        void serialize(() => allowParsed(parsed, options, nativeFetch)).then((allowed) => {
+          if (allowed) nativeAssignFn.call(window.location, link.href);
+        });
       },
       true
     );
     window.fetch = async (input, init) => {
       const href = requestHref(input);
       const method = (init?.method || (input instanceof Request ? input.method : "GET")).toUpperCase();
-      if (!isCartAddPath(href) && !(input instanceof Request && isCartAddPath(input.url))) {
+      const parsed = gatedParse(
+        input instanceof Request ? input.url : href,
+        method,
+        await bodyFromFetch(input, init)
+      );
+      if (parsed.type === "ignore" || parsed.type === "allow") {
         return nativeFetch(input, init);
       }
-      let raw;
-      if (input instanceof Request) {
-        raw = variantIdFromSearchParams(new URL(input.url, window.location.href).searchParams);
-        if (!raw && method !== "GET") {
-          try {
-            raw = variantIdFromCartAddBody(await input.clone().text());
-          } catch {
-            raw = void 0;
-          }
-        }
-      } else {
-        raw = variantIdFromSearchParams(new URL(href, window.location.href).searchParams);
-      }
-      if (!raw && init?.body) raw = variantIdFromCartAddBody(init.body);
-      const allowed = await decide(raw, options);
-      if (!allowed) {
-        return new Response(
-          JSON.stringify({
-            status: 422,
-            message: "DISCLOSURE_RETRIEVAL_REQUIRED",
-            description: "Retrieve this product's current ingredient and label statements with get_product_food_disclosures, then retry the cart update."
-          }),
-          { status: 422, headers: { "Content-Type": "application/json" } }
-        );
-      }
+      const allowed = await serialize(() => allowParsed(parsed, options, nativeFetch));
+      if (!allowed) return blockedResponse();
       return nativeFetch(input, init);
     };
     XMLHttpRequest.prototype.open = function(method, url, async, username, password) {
+      xhrMethod.set(this, method);
       xhrUrl.set(this, String(url));
       return xhrOpen.call(this, method, url, async ?? true, username, password);
     };
     XMLHttpRequest.prototype.send = function(body) {
       const href = xhrUrl.get(this) ?? "";
-      if (!isCartAddPath(href)) {
+      const method = xhrMethod.get(this) ?? "GET";
+      const parsed = gatedParse(href, method, body);
+      if (parsed.type === "ignore" || parsed.type === "allow") {
         xhrSend.call(this, body);
         return;
       }
-      const raw = variantIdFromSearchParams(new URL(href, window.location.href).searchParams) ?? variantIdFromCartAddBody(body);
-      void decide(raw, options).then((allowed) => {
+      void serialize(() => allowParsed(parsed, options, nativeFetch)).then((allowed) => {
         if (!allowed) {
           Object.defineProperty(this, "status", { configurable: true, value: 422 });
           Object.defineProperty(this, "responseText", {
@@ -904,6 +1220,109 @@
         }
         xhrSend.call(this, body);
       });
+    };
+    function patchLocation(loc) {
+      try {
+        loc.assign = (url) => {
+          interceptNavigation(String(url), () => nativeAssignFn.call(loc, url));
+        };
+      } catch {
+      }
+      try {
+        loc.replace = (url) => {
+          interceptNavigation(String(url), () => nativeReplaceFn.call(loc, url));
+        };
+      } catch {
+      }
+      if (hrefDesc?.get && hrefDesc.set) {
+        try {
+          Object.defineProperty(loc, "href", {
+            configurable: true,
+            enumerable: hrefDesc.enumerable === true,
+            get() {
+              return hrefDesc.get.call(loc);
+            },
+            set(value) {
+              interceptNavigation(String(value), () => hrefDesc.set.call(loc, value));
+            }
+          });
+        } catch {
+        }
+      }
+    }
+    try {
+      Location.prototype.assign = function(url) {
+        interceptNavigation(String(url), () => nativeAssignFn.call(this, url));
+      };
+      Location.prototype.replace = function(url) {
+        interceptNavigation(String(url), () => nativeReplaceFn.call(this, url));
+      };
+      if (hrefDesc?.get && hrefDesc.set) {
+        Object.defineProperty(Location.prototype, "href", {
+          configurable: true,
+          enumerable: hrefDesc.enumerable === true,
+          get() {
+            return hrefDesc.get.call(this);
+          },
+          set(value) {
+            interceptNavigation(String(value), () => hrefDesc.set.call(this, value));
+          }
+        });
+      }
+    } catch {
+    }
+    patchLocation(window.location);
+    const navigation = window.navigation;
+    if (navigation) {
+      let bypassNavigation = false;
+      navigation.addEventListener("navigate", (event) => {
+        if (bypassNavigation) return;
+        const navEvent = event;
+        if (!navEvent.canIntercept || navEvent.hashChange || navEvent.downloadRequest) return;
+        const url = navEvent.destination?.url;
+        if (!url || !navEvent.intercept) return;
+        const parsed = gatedParse(url, "GET");
+        if (parsed.type === "ignore" || parsed.type === "allow") return;
+        const originHref = window.location.href;
+        navEvent.intercept({
+          handler: async () => {
+            const allowed = await serialize(() => allowParsed(parsed, options, nativeFetch));
+            if (!allowed) {
+              history.replaceState(history.state, "", originHref);
+              return;
+            }
+            bypassNavigation = true;
+            try {
+              nativeAssignFn.call(window.location, url);
+            } finally {
+              bypassNavigation = false;
+            }
+          }
+        });
+      });
+    }
+    window.open = function(url, target, features) {
+      if (url == null || url === "") return nativeOpen(url, target, features);
+      const parsed = gatedParse(String(url), "GET");
+      if (parsed.type === "ignore" || parsed.type === "allow") {
+        return nativeOpen(String(url), target, features);
+      }
+      void serialize(() => allowParsed(parsed, options, nativeFetch)).then((allowed) => {
+        if (allowed) nativeOpen(String(url), target, features);
+      });
+      return null;
+    };
+    if (nativeBeacon) {
+      navigator.sendBeacon = (url, data) => {
+        const parsed = gatedParse(String(url), "POST", data);
+        if (parsed.type === "ignore" || parsed.type === "allow") {
+          return nativeBeacon(url, data);
+        }
+        return false;
+      };
+    }
+    return {
+      reconcile: () => serialize(() => stripUnauthorizedCartLines(nativeFetch, options.evaluate))
     };
   }
 
@@ -1105,6 +1524,37 @@
     accepted: "food-disclosure:cart-accepted"
   };
 
+  // src/cart-view.ts
+  function updateCartChrome(quantity, total, root = document) {
+    const badge = root.getElementById("cart-count");
+    if (badge) badge.textContent = String(quantity);
+    if (total === void 0) return;
+    const totalEl = root.getElementById("cart-total");
+    if (totalEl) totalEl.textContent = total;
+  }
+  function applyFetchedCartPage(html, root = document) {
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    const count = doc.getElementById("cart-count")?.textContent?.trim();
+    const total = doc.getElementById("cart-total")?.textContent?.trim();
+    if (count) updateCartChrome(Number.parseInt(count, 10) || 0, total, root);
+    const next = doc.getElementById("cart-page");
+    const current = root.getElementById("cart-page");
+    if (next && current) current.replaceWith(root.importNode(next, true));
+  }
+  var refreshSeq = 0;
+  async function refreshCartView() {
+    const seq = ++refreshSeq;
+    try {
+      const response = await fetch("/cart", { credentials: "same-origin", cache: "no-store" });
+      if (!response.ok) return;
+      const html = await response.text();
+      if (seq !== refreshSeq) return;
+      applyFetchedCartPage(html);
+    } catch {
+      return;
+    }
+  }
+
   // src/bootstrap.ts
   function storageOrNull() {
     try {
@@ -1173,6 +1623,7 @@
           updateCartBadge(result.cart?.totalQuantity ?? 0);
           renderReview({ kind: "accepted", quantity: result.cart?.totalQuantity ?? 0 });
           dispatch(EVENTS.accepted, result);
+          void refreshCartView();
         }
         return result;
       }
@@ -1183,7 +1634,7 @@
     }
     ready = true;
     deps.ready = true;
-    installStorefrontCartGuard({
+    const guard = installStorefrontCartGuard({
       evaluate: (raw) => evaluateVariantAdd(raw, deps),
       onBlocked: (decision) => {
         renderReview({
@@ -1196,6 +1647,16 @@
           detail: { food_disclosure: { reason_code: decision.reason } }
         });
       }
+    });
+    const runReconcile = () => {
+      void guard.reconcile().then((changed) => {
+        if (changed) void refreshCartView();
+      });
+    };
+    runReconcile();
+    window.addEventListener("pageshow", runReconcile);
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") runReconcile();
     });
     if (typeof document.modelContext?.registerTool !== "function") {
       renderReview({ kind: "unsupported" });

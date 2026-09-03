@@ -27,7 +27,7 @@
       <a class="cart-link" href="{{ routes.cart_url }}">
         {{ 'header.cart' | t }}
         (<span id="cart-count">{{ cart.item_count }}</span>)
-        · {{ cart.total_price | money }}
+        · <span id="cart-total">{{ cart.total_price | money }}</span>
       </a>
     </nav>
   </div>

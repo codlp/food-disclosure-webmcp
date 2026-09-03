@@ -30,7 +30,9 @@
     <main id="main-content">
       {{ content_for_layout }}
     </main>
-    {% section 'disclosure-review' %}
+    {% unless template.name == 'cart' %}
+      {% section 'disclosure-review' %}
+    {% endunless %}
     {% section 'footer' %}
     <div
       id="food-disclosure-cart-status"
