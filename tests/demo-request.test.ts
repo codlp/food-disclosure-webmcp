@@ -14,11 +14,7 @@ type CatalogProduct = {
 };
 
 describe("demo request", () => {
-  it("matches the storefront copy and the $40 budget", () => {
-    const locales = JSON.parse(readFileSync("theme/locales/en.default.json", "utf8")) as {
-      hero: { request: string };
-    };
-    expect(locales.hero.request).toBe(DEMO_REQUEST);
+  it("keeps the $40 budget", () => {
     expect(DEMO_REQUEST).toContain(`$${DEMO_BUDGET_USD}`);
   });
 

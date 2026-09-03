@@ -33,8 +33,12 @@ Renders a product card with human add controls and a label dialog.
     {% endform %}
   </div>
   <dialog id="label-{{ product.id }}">
-    <h2>{{ product.title }}</h2>
+    <div class="dialog__head">
+      <h2>{{ product.title }}</h2>
+      <button type="button" class="dialog-close" data-close-dialog aria-label="{{ 'product.close' | t }}">
+        <span aria-hidden="true">×</span>
+      </button>
+    </div>
     {% render 'pack-label', product: product %}
-    <button type="button" class="button" data-close-dialog>{{ 'product.close' | t }}</button>
   </dialog>
 </article>

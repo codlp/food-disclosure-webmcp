@@ -64,7 +64,10 @@ function cartQty(raw) {
         ? cart.line_items
         : null;
   if (!Array.isArray(lines)) return null;
-  return lines.reduce((sum, line) => sum + (typeof line?.quantity === "number" ? line.quantity : 0), 0);
+  return lines.reduce(
+    (sum, line) => sum + (typeof line?.quantity === "number" ? line.quantity : 0),
+    0,
+  );
 }
 
 function shape(raw) {
@@ -74,7 +77,8 @@ function shape(raw) {
   return {
     kind: "object",
     keys: Object.keys(value).slice(0, 16),
-    cartKeys: value.cart && typeof value.cart === "object" ? Object.keys(value.cart).slice(0, 16) : null,
+    cartKeys:
+      value.cart && typeof value.cart === "object" ? Object.keys(value.cart).slice(0, 16) : null,
     qty: cartQty(value),
     userErrorCount: Array.isArray(value.userErrors) ? value.userErrors.length : null,
   };
@@ -633,7 +637,11 @@ async function run() {
       /Retrieve this product/.test(acceptedText) ||
       /after\.lines\.filter/.test(acceptedText) ||
       (typeof accepted?.error === "string" && accepted.error.length > 0);
-    if (acceptedFail) fail("accept_after_retrieval", { result: scrub(accepted).slice(0, 400), shape: shape(accepted) });
+    if (acceptedFail)
+      fail("accept_after_retrieval", {
+        result: scrub(accepted).slice(0, 400),
+        shape: shape(accepted),
+      });
     else pass("accept_after_retrieval", { shape: shape(accepted) });
 
     await delay(800);
@@ -647,8 +655,16 @@ async function run() {
     );
     const qtyAfterAccept = cartQty(accepted) ?? cartQty(cartAfterAccept);
     if (typeof qtyAfterAccept === "number" && qtyAfterAccept >= 1)
-      pass("cart_increased", { qtyAfterAccept, fromAccept: cartQty(accepted), fromGetCart: cartQty(cartAfterAccept) });
-    else fail("cart_increased", { shapeAccept: shape(accepted), shapeGetCart: shape(cartAfterAccept) });
+      pass("cart_increased", {
+        qtyAfterAccept,
+        fromAccept: cartQty(accepted),
+        fromGetCart: cartQty(cartAfterAccept),
+      });
+    else
+      fail("cart_increased", {
+        shapeAccept: shape(accepted),
+        shapeGetCart: shape(cartAfterAccept),
+      });
 
     const handleAccepted = await evaluate(
       ws,
@@ -698,7 +714,8 @@ async function run() {
         status: window.__foodDisclosureAgent.status(),
       })`,
     );
-    if (afterNav?.receipts?.count >= 1) pass("receipt_survives_navigation", { count: afterNav.receipts.count });
+    if (afterNav?.receipts?.count >= 1)
+      pass("receipt_survives_navigation", { count: afterNav.receipts.count });
     else fail("receipt_survives_navigation", { afterNav });
     const reviewOk =
       typeof afterNav?.status === "string" &&
@@ -718,7 +735,10 @@ async function run() {
         });
       })()`,
     );
-    if (!isGateReject(afterNavAdd) && !(typeof afterNavAdd?.error === "string" && afterNavAdd.error))
+    if (
+      !isGateReject(afterNavAdd) &&
+      !(typeof afterNavAdd?.error === "string" && afterNavAdd.error)
+    )
       pass("gate_still_accepts_after_navigation", { shape: shape(afterNavAdd) });
     else fail("gate_still_accepts_after_navigation", { result: scrub(afterNavAdd).slice(0, 400) });
 
@@ -787,12 +807,19 @@ async function run() {
           catch (e) { return { error: String(e) }; }
         })()`,
       );
-      pass("human_quantity_decrease", { qty: cartQty(qtyAfterDecrease), shape: shape(qtyAfterDecrease) });
+      pass("human_quantity_decrease", {
+        qty: cartQty(qtyAfterDecrease),
+        shape: shape(qtyAfterDecrease),
+      });
     } else {
       fail("human_quantity_decrease", { cartPage });
     }
 
-    const cartAfterDecrease = await evaluate(ws, sessionId, `window.__foodDisclosureAgent.humanCart()`);
+    const cartAfterDecrease = await evaluate(
+      ws,
+      sessionId,
+      `window.__foodDisclosureAgent.humanCart()`,
+    );
     if (cartAfterDecrease?.removeLink) {
       await evaluate(
         ws,

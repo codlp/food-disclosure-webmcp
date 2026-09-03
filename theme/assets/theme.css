@@ -179,6 +179,11 @@ p {
   padding: 10px 14px;
 }
 
+.site-header .search-bar {
+  flex: 1 1 12rem;
+  max-width: 23rem;
+}
+
 .search-bar label {
   font-family: var(--mono);
   font-size: 11px;
@@ -209,6 +214,8 @@ p {
   align-items: center;
   gap: 24px;
   font-size: 14px;
+  margin-left: auto;
+  flex: none;
 }
 
 .site-header nav a {
@@ -261,7 +268,12 @@ main {
   z-index: 1;
   pointer-events: none;
   background:
-    linear-gradient(180deg, rgb(47 46 40 / 0.12) 0%, rgb(47 46 40 / 0.18) 38%, rgb(47 46 40 / 0.78) 100%),
+    linear-gradient(
+      180deg,
+      rgb(47 46 40 / 0.12) 0%,
+      rgb(47 46 40 / 0.18) 38%,
+      rgb(47 46 40 / 0.78) 100%
+    ),
     linear-gradient(90deg, rgb(47 46 40 / 0.55) 0%, rgb(47 46 40 / 0.08) 62%);
 }
 
@@ -578,33 +590,6 @@ main {
   color: var(--ink);
 }
 
-.hero .button[data-copied="true"],
-.assistants .button[data-copied="true"] {
-  background: transparent;
-  color: var(--ink);
-  border: 1px solid var(--line);
-}
-
-.hero__request-label {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--faint);
-}
-
-#demo-request-text {
-  font-size: 14px;
-  color: var(--ink);
-  border: 1px dashed var(--dash);
-  padding: 10px 12px;
-  background: var(--paper-strong);
-}
-
-.assistants .button {
-  align-self: flex-start;
-}
-
 .shop-notes {
   width: var(--wrap);
   margin-inline: auto;
@@ -628,72 +613,9 @@ main {
   font-size: 14px;
 }
 
-.assistants {
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-  background: var(--paper-warm);
-}
-
-.assistants__inner {
-  width: var(--wrap);
-  margin-inline: auto;
-  padding: 56px 0;
-  display: grid;
-  gap: 56px;
-  align-items: start;
-}
-
-.assistants__copy h2 {
-  font-size: 30px;
-  line-height: 1.2;
-}
-
-.assistants__copy {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  max-width: 26em;
-}
-
-.assistants__copy p {
-  margin: 0;
-  color: var(--muted);
-}
-
-.assistants__tools {
-  border: 1px solid var(--line);
-  background: var(--paper-strong);
-}
-
-.tool-row,
 .review-panel p,
 .review-panel h2 {
   margin: 0;
-}
-
-.tool-row {
-  padding: 13px 18px;
-  border-bottom: 1px solid #e6e1d2;
-  display: flex;
-  gap: 16px;
-  align-items: baseline;
-}
-
-.tool-row:last-child {
-  border-bottom: 0;
-}
-
-.tool-row code,
-.tool-row .tool-name {
-  font-family: var(--mono);
-  font-size: 12px;
-  color: var(--ink);
-  min-width: 12em;
-}
-
-.tool-row span {
-  font-size: 13px;
-  color: var(--muted);
 }
 
 .review-panel:not(.is-active) {
@@ -967,11 +889,7 @@ main {
   height: 60px;
   border: 1px solid var(--photo-edge);
   overflow: hidden;
-  background: repeating-linear-gradient(
-    135deg,
-    var(--stripe-a) 0 6px,
-    var(--stripe-b) 6px 12px
-  );
+  background: repeating-linear-gradient(135deg, var(--stripe-a) 0 6px, var(--stripe-b) 6px 12px);
 }
 
 .cart-line__media img {
@@ -1211,6 +1129,43 @@ dialog::backdrop {
   background: rgb(47 46 40 / 0.28);
 }
 
+.dialog__head {
+  display: block;
+  padding-right: 2.4rem;
+}
+
+.dialog__head h2 {
+  margin: 0;
+}
+
+.dialog-close {
+  position: absolute;
+  top: 0.35rem;
+  right: 0.35rem;
+  width: var(--touch);
+  height: var(--touch);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--faint);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dialog-close span {
+  font-size: 22px;
+  line-height: 1;
+  font-weight: 400;
+}
+
+.dialog-close:hover,
+.dialog-close:focus-visible {
+  color: var(--ink);
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -1272,7 +1227,6 @@ dialog::backdrop {
   }
 
   .hero__inner,
-  .assistants__inner,
   .shop-layout {
     gap: 28px;
   }
@@ -1281,13 +1235,18 @@ dialog::backdrop {
     padding: 28px 0 56px;
   }
 
-  .assistants__inner,
   .shop-layout {
     padding-top: 32px;
   }
 
   .site-header__inner {
     gap: 16px;
+  }
+
+  .site-header .search-bar {
+    flex: 1 1 100%;
+    max-width: none;
+    order: 3;
   }
 }
 
@@ -1330,12 +1289,8 @@ dialog::backdrop {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
-  .assistants__inner {
-    grid-template-columns: 0.9fr 1.1fr;
-  }
-
   .shop-notes__grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 

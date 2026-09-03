@@ -64,8 +64,8 @@ function show(root: Document, state: ReviewState) {
     text(
       status,
       state.kind === "idle"
-        ? "No product has been retrieved by the agent yet."
-        : "Site tools are not available in this browser. You can still browse and use the human cart.",
+        ? "No product has been retrieved yet."
+        : "Site tools are not available in this browser. You can still browse and use the cart.",
     );
     if (list) list.replaceChildren();
     return;

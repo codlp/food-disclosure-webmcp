@@ -4,43 +4,20 @@
   },
   "header": {
     "home": "Maple & Sage",
-    "shop": "Shop",
-    "assistants": "Assistants",
     "cart": "Basket"
   },
   "hero": {
-    "heading": "Maple & Sage, with the door left open.",
-    "body": "Twelve packaged snacks on one shelf. Shop in person with the ordinary add button, or send an assistant. Same prices, same labels, whoever is doing the shopping.",
-    "stock": "12 lines in stock today",
-    "labels": "Ingredients and label statements on every pack",
-    "access": "The store does not judge suitability",
-    "photo_alt": "Fictional Maple & Sage shop front, with the door open",
-    "request_label": "Try this request",
-    "copy": "Copy demo request",
-    "copied": "Demo request copied",
-    "copy_failed": "Copy failed. Select the request text below.",
-    "request": "Build a snack basket under $40. Avoid wheat, barley, rye, malt, semolina, and anything with a “may contain wheat” or “may contain gluten” label statement. Do not add products with missing ingredient or label statement data."
+    "heading": "Maple & Sage",
+    "photo_alt": "Fictional Maple & Sage shop front, with the door open"
   },
   "review": {
     "heading": "Disclosure review"
   },
-  "assistants": {
-    "kicker": "Shopping by assistant",
-    "heading": "If an assistant does your shopping, it uses the same counter.",
-    "body": "This page publishes the shelf, the basket, and the pack labels as WebMCP tools. An assistant must retrieve ingredients and label statements, including missing fields, before it can change the live cart.",
-    "search": "Search the snack shelf.",
-    "get_product": "Read one product from the catalog.",
-    "disclosures": "Retrieve merchant ingredients and label statements, including null.",
-    "update_cart": "Change the live cart. An increase needs a current disclosure receipt.",
-    "get_cart": "Read the current cart."
-  },
   "notes": {
     "labels_title": "Labels",
     "labels_body": "Ingredients and label statements are on every pack. Empty is not the same as missing. We make no claims about health.",
-    "agent_title": "Assistants",
-    "agent_body": "An assistant can shop. It cannot skip the label. Retrieval is required before a native cart increase.",
     "human_title": "People",
-    "human_body": "A person can still add and remove items with the ordinary product form. That path is not gated.",
+    "human_body": "You can add and remove items with the ordinary product form.",
     "demo_title": "This shop",
     "demo_body": "Fictional snacks. Nothing is dispatched and no payment is taken."
   },
@@ -73,11 +50,11 @@
     "items_other": "{{ count }} items",
     "total": "Total",
     "place": "Place order · {{ total }}",
-    "place_notice": "Demonstration shop. Nothing is dispatched and no payment is taken. People and assistants use the same basket."
+    "place_notice": "Demonstration shop. Nothing is dispatched and no payment is taken."
   },
   "search": {
     "heading": "Search",
-    "placeholder": "search",
+    "placeholder": "Search",
     "label": "Search products",
     "submit": "Search",
     "empty": "Nothing on the shelf matches that."
@@ -98,7 +75,7 @@
     "hours_sunday": "Sunday",
     "hours_sunday_time": "9.00–14.00",
     "note_title": "Note",
-    "notice": "A fictional shop, built as a demonstration of agent-shoppable grocery. Nothing is dispatched and no payment is taken."
+    "notice": "A fictional shop, built as a demonstration. Nothing is dispatched and no payment is taken."
   },
   "not_found": {
     "heading": "Page not found",
