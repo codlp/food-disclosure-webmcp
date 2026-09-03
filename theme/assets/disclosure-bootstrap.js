@@ -421,7 +421,7 @@
   var RECOVERY_RETRIEVE = "Retrieve this product's current ingredient and label statements with get_product_food_disclosures, then retry the cart update.";
   var RECOVERY_STALE = "The page now contains a different disclosure version. Retrieve it again before increasing the cart quantity.";
   var RECOVERY_LINE = "This cart line could not be associated with a product version retrieved in this tab. Remove or decrease it, or retrieve the product again before an increase.";
-  var RECOVERY_UNAVAILABLE = "The disclosure gate is not active in this browser. Human cart controls still work. Do not assume retrieval is required or recorded.";
+  var RECOVERY_UNAVAILABLE = "The disclosure gate is not active in this browser. Do not assume retrieval is required or recorded.";
   function currentQty(cart, lineId) {
     return cart.lines.find((line) => line.id === lineId)?.quantity;
   }
@@ -493,7 +493,6 @@
         };
       }
       if (quantity === 0 || quantity < existing) return { ok: true };
-      if (quantity === existing) return { ok: true };
       return requireReceiptForVariant(
         lineMap.get(cartLineId) ?? cart.lines.find((l) => l.id === cartLineId)?.merchandiseId,
         deps,
@@ -574,6 +573,26 @@
     }
     return { ok: true };
   }
+  async function evaluateVariantAdd(raw, deps) {
+    if (!deps.ready) {
+      return {
+        ok: false,
+        reason: "DISCLOSURE_GATE_UNAVAILABLE",
+        field: ["id"],
+        message: RECOVERY_UNAVAILABLE
+      };
+    }
+    const resolved = resolveAddTarget(raw, deps.registry);
+    if (!resolved) {
+      return {
+        ok: false,
+        reason: "UNKNOWN_PRODUCT_VARIANT",
+        field: ["id"],
+        message: RECOVERY_RETRIEVE
+      };
+    }
+    return requireReceiptForVariant(resolved.variantId, deps, ["id"], false);
+  }
   function reconcileLineMap(storage, before, after, payload) {
     const beforeCart = normalizeCartSummary(before);
     const afterCart = normalizeCartSummary(after);
@@ -625,20 +644,20 @@
         cart = EMPTY_CART;
       }
       const safeCart = cart ?? EMPTY_CART;
-      const hasIncrease = (normalized.lines ?? []).some((line) => {
+      const needsReceipt = (normalized.lines ?? []).some((line) => {
         if (line.merchandiseId && !isCartLineGid(line.id)) return true;
         if ((line.handle || line.query) && !isCartLineGid(line.id)) return true;
         if (line.id && !isCartLineGid(line.id)) return true;
         if (line.id && isCartLineGid(line.id)) {
           const existing = currentQty(safeCart, line.id) ?? 0;
-          return (line.quantity ?? 1) > existing;
+          return (line.quantity ?? 1) >= existing && (line.quantity ?? 1) > 0;
         }
         return false;
       });
-      if (!deps.ready && hasIncrease) {
+      if (!deps.ready && needsReceipt) {
         return reject(safeCart, "DISCLOSURE_GATE_UNAVAILABLE", ["lines"], RECOVERY_UNAVAILABLE);
       }
-      if (!hasIncrease) {
+      if (!needsReceipt) {
         return defaultHandler();
       }
       const decision = await evaluatePayload(normalized, safeCart, deps);
@@ -661,6 +680,231 @@
       }
       return result;
     }, options?.signal);
+  }
+
+  // src/storefront-gate.ts
+  function pathnameOf(url) {
+    try {
+      return new URL(url, "https://shop.example/").pathname;
+    } catch {
+      return url;
+    }
+  }
+  function isCartAddPath(url) {
+    return /\/cart\/add(?:\.js|\.json)?$/i.test(pathnameOf(url));
+  }
+  function variantIdFromSearchParams(params) {
+    const id = params.get("id");
+    return id?.trim() || void 0;
+  }
+  function variantIdFromCartAddBody(body) {
+    if (body == null || body === "") return void 0;
+    if (typeof FormData !== "undefined" && body instanceof FormData) {
+      const id = body.get("id");
+      return typeof id === "string" && id.trim() ? id.trim() : void 0;
+    }
+    if (typeof URLSearchParams !== "undefined" && body instanceof URLSearchParams) {
+      return variantIdFromSearchParams(body);
+    }
+    if (typeof body === "string") {
+      try {
+        return variantIdFromCartAddBody(JSON.parse(body));
+      } catch {
+        return variantIdFromSearchParams(new URLSearchParams(body));
+      }
+    }
+    if (ArrayBuffer.isView(body) || body instanceof ArrayBuffer) {
+      try {
+        return variantIdFromCartAddBody(new TextDecoder().decode(body));
+      } catch {
+        return void 0;
+      }
+    }
+    if (typeof body === "object") {
+      const rec = body;
+      if (typeof rec.id === "string" || typeof rec.id === "number") return String(rec.id);
+      const items = rec.items;
+      if (Array.isArray(items) && items[0] && typeof items[0] === "object") {
+        const first = items[0];
+        if (typeof first.id === "string" || typeof first.id === "number") return String(first.id);
+      }
+    }
+    return void 0;
+  }
+  function requestHref(input) {
+    if (typeof input === "string") return input;
+    if (input instanceof URL) return input.href;
+    return input.url;
+  }
+  function isProductAddForm(form) {
+    const action = form.getAttribute("action") || form.action || "";
+    if (isCartAddPath(action)) return true;
+    return Boolean(form.querySelector('[name="add"]'));
+  }
+  function variantIdFromForm(form) {
+    const input = form.querySelector(
+      'select[name="id"], input[name="id"]'
+    );
+    const value = input?.value?.trim();
+    return value || void 0;
+  }
+  async function decide(raw, options) {
+    if (!raw) {
+      const decision2 = {
+        ok: false,
+        reason: "UNKNOWN_PRODUCT_VARIANT",
+        field: ["id"],
+        message: "Retrieve this product's current ingredient and label statements with get_product_food_disclosures, then retry the cart update."
+      };
+      options.onBlocked(decision2);
+      return false;
+    }
+    const decision = await options.evaluate(raw);
+    if (!decision.ok) {
+      options.onBlocked(decision);
+      return false;
+    }
+    return true;
+  }
+  function installStorefrontCartGuard(options) {
+    const allowedForms = /* @__PURE__ */ new WeakSet();
+    const nativeSubmit = HTMLFormElement.prototype.submit;
+    const nativeRequestSubmit = HTMLFormElement.prototype.requestSubmit;
+    const nativeFetch = window.fetch.bind(window);
+    const xhrOpen = XMLHttpRequest.prototype.open;
+    const xhrSend = XMLHttpRequest.prototype.send;
+    const xhrUrl = /* @__PURE__ */ new WeakMap();
+    async function submitIfAllowed(form) {
+      if (!isProductAddForm(form)) {
+        nativeSubmit.call(form);
+        return;
+      }
+      const allowed = await decide(variantIdFromForm(form), options);
+      if (!allowed) return;
+      allowedForms.add(form);
+      try {
+        nativeSubmit.call(form);
+      } finally {
+        allowedForms.delete(form);
+      }
+    }
+    HTMLFormElement.prototype.submit = function() {
+      if (allowedForms.has(this) || !isProductAddForm(this)) {
+        nativeSubmit.call(this);
+        return;
+      }
+      void submitIfAllowed(this);
+    };
+    HTMLFormElement.prototype.requestSubmit = function(submitter) {
+      if (allowedForms.has(this) || !isProductAddForm(this)) {
+        nativeRequestSubmit.call(this, submitter ?? void 0);
+        return;
+      }
+      void submitIfAllowed(this);
+    };
+    document.addEventListener(
+      "submit",
+      (event) => {
+        const form = event.target;
+        if (!(form instanceof HTMLFormElement) || !isProductAddForm(form)) return;
+        if (allowedForms.has(form)) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        void submitIfAllowed(form);
+      },
+      true
+    );
+    document.addEventListener(
+      "click",
+      (event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+        const addButton = target.closest('button[name="add"], input[name="add"]');
+        if (addButton?.form instanceof HTMLFormElement) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          void submitIfAllowed(addButton.form);
+          return;
+        }
+        const increase = target.closest("a[data-cart-increase]");
+        if (increase) {
+          const raw = increase.getAttribute("data-cart-increase")?.trim();
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          void decide(raw, options).then((allowed) => {
+            if (allowed && increase.href) window.location.assign(increase.href);
+          });
+          return;
+        }
+        const addLink = target.closest("a[href]");
+        if (addLink?.href && isCartAddPath(addLink.href)) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          const raw = variantIdFromSearchParams(new URL(addLink.href, window.location.href).searchParams) ?? addLink.getAttribute("data-variant-id") ?? void 0;
+          void decide(raw, options).then((allowed) => {
+            if (allowed) window.location.assign(addLink.href);
+          });
+        }
+      },
+      true
+    );
+    window.fetch = async (input, init) => {
+      const href = requestHref(input);
+      const method = (init?.method || (input instanceof Request ? input.method : "GET")).toUpperCase();
+      if (!isCartAddPath(href) && !(input instanceof Request && isCartAddPath(input.url))) {
+        return nativeFetch(input, init);
+      }
+      let raw;
+      if (input instanceof Request) {
+        raw = variantIdFromSearchParams(new URL(input.url, window.location.href).searchParams);
+        if (!raw && method !== "GET") {
+          try {
+            raw = variantIdFromCartAddBody(await input.clone().text());
+          } catch {
+            raw = void 0;
+          }
+        }
+      } else {
+        raw = variantIdFromSearchParams(new URL(href, window.location.href).searchParams);
+      }
+      if (!raw && init?.body) raw = variantIdFromCartAddBody(init.body);
+      const allowed = await decide(raw, options);
+      if (!allowed) {
+        return new Response(
+          JSON.stringify({
+            status: 422,
+            message: "DISCLOSURE_RETRIEVAL_REQUIRED",
+            description: "Retrieve this product's current ingredient and label statements with get_product_food_disclosures, then retry the cart update."
+          }),
+          { status: 422, headers: { "Content-Type": "application/json" } }
+        );
+      }
+      return nativeFetch(input, init);
+    };
+    XMLHttpRequest.prototype.open = function(method, url, async, username, password) {
+      xhrUrl.set(this, String(url));
+      return xhrOpen.call(this, method, url, async ?? true, username, password);
+    };
+    XMLHttpRequest.prototype.send = function(body) {
+      const href = xhrUrl.get(this) ?? "";
+      if (!isCartAddPath(href)) {
+        xhrSend.call(this, body);
+        return;
+      }
+      const raw = variantIdFromSearchParams(new URL(href, window.location.href).searchParams) ?? variantIdFromCartAddBody(body);
+      void decide(raw, options).then((allowed) => {
+        if (!allowed) {
+          Object.defineProperty(this, "status", { configurable: true, value: 422 });
+          Object.defineProperty(this, "responseText", {
+            configurable: true,
+            value: JSON.stringify({ status: 422, message: "DISCLOSURE_RETRIEVAL_REQUIRED" })
+          });
+          this.dispatchEvent(new Event("load"));
+          return;
+        }
+        xhrSend.call(this, body);
+      });
+    };
   }
 
   // src/tool.ts
@@ -939,6 +1183,20 @@
     }
     ready = true;
     deps.ready = true;
+    installStorefrontCartGuard({
+      evaluate: (raw) => evaluateVariantAdd(raw, deps),
+      onBlocked: (decision) => {
+        renderReview({
+          kind: "rejected",
+          reason: decision.reason,
+          message: decision.message
+        });
+        dispatch(EVENTS.rejected, {
+          userErrors: [{ code: "INVALID", field: decision.field, message: decision.message }],
+          detail: { food_disclosure: { reason_code: decision.reason } }
+        });
+      }
+    });
     if (typeof document.modelContext?.registerTool !== "function") {
       renderReview({ kind: "unsupported" });
       return;

@@ -32,7 +32,7 @@ Label Check makes an agent retrieve a product’s ingredients and label statemen
 
 An agent can search through the product catalog and build a cart the same way it would on any online store. What it has to retrieve is the ingredients and the label statements, including when a field is missing. "null" is not the same as an empty list and it is not treated as "none".
 
-Alongside the agent’s WebMCP path, the client can still use the ordinary "add" button to add products to their cart.
+The ordinary Add button is not a second path. It uses the same label receipt as `update_cart`. Remove and decrease still work without retrieval.
 
 The store never decides whether a product is suitable. The client lists their restrictions for their AI agent, the merchant supplies the facts (ingredients and label information), and the AI agent compares them to make a decision.
 
@@ -46,7 +46,7 @@ The store never decides whether a product is suitable. The client lists their re
 6. Call `get_product_food_disclosures` for that product. Then retry the add. The cart must update.
 7. Retrieve Hillpath Trail Mix. Confirm `label_statements` is `null`, not `[]`.
 8. Repeat in ChatGPT desktop. Do not use the Luna model.
-9. Confirm a human can still add and remove items with the ordinary product form.
+9. Confirm Add without retrieval does not change the cart, including the ordinary Add button. Remove and decrease still work.
 
 Harbor Salt Potato Chips has `label_statements: []`. Hillpath Trail Mix has `label_statements: null`. Those are different on purpose. `null` means the merchant did not supply the field. `[]` means the merchant supplied a record with no separate label statement.
 
@@ -63,9 +63,9 @@ See [docs/architecture.md](docs/architecture.md) for the gate, receipts, and cat
 3. The agent calls `get_product_food_disclosures` before it adds a product.
 4. The tool returns merchant ingredients and label statements, including missing fields. The page stores a receipt in this tab.
 5. The agent compares those facts to the shopper’s restrictions. The store does not judge suitability.
-6. Native `update_cart` can increase a cart line only when that receipt is current. Without it, the cart does not change.
+6. Native `update_cart` and the ordinary Add control can increase a cart line only when that receipt is current. Without it, the cart does not change.
 
-A receipt records that retrieval ran for this product version in this tab. It does not mean the agent understood the label. It does not mean the snack is suitable. A human can still use the ordinary product form. Checkout is not part of this demo.
+A receipt records that retrieval ran for this product version in this tab. It does not mean the agent understood the label. It does not mean the snack is suitable. Add on the page uses the same receipt. Checkout is not part of this demo.
 
 ## Custom tool
 

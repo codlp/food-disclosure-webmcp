@@ -516,6 +516,35 @@ async function run() {
     if (qtyAfterReject === 0 || qtyAfterReject == null) pass("cart_unchanged_after_reject");
     else fail("cart_unchanged_after_reject", { qtyAfterReject, shape: shape(cartAfterReject) });
 
+    await evaluate(
+      ws,
+      sessionId,
+      `(() => {
+        const button = document.querySelector('button[name="add"]');
+        button?.form?.submit();
+        return Boolean(button?.form);
+      })()`,
+      false,
+    );
+    await delay(1500);
+    const cartAfterFormReject = await evaluate(
+      ws,
+      sessionId,
+      `(async () => {
+        try { return await window.__foodDisclosureAgent.call("get_cart", {}); }
+        catch (e) { return { error: String(e) }; }
+      })()`,
+    );
+    const qtyAfterFormReject = cartQty(cartAfterFormReject);
+    if (qtyAfterFormReject === 0 || qtyAfterFormReject == null) {
+      pass("form_add_rejected_without_retrieval");
+    } else {
+      fail("form_add_rejected_without_retrieval", {
+        qtyAfterFormReject,
+        shape: shape(cartAfterFormReject),
+      });
+    }
+
     const handleRejected = await evaluate(
       ws,
       sessionId,

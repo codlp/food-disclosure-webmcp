@@ -1,4 +1,5 @@
-import { handleUpdateCart, type GateDeps } from "./cart-gate";
+import { evaluateVariantAdd, handleUpdateCart, type GateDeps } from "./cart-gate";
+import { installStorefrontCartGuard } from "./storefront-gate";
 import { parseRegistry } from "./disclosures";
 import { createReceiptStore, pruneStaleReceipts } from "./receipts";
 import { executeDisclosureTool, toolContract } from "./tool";
@@ -129,6 +130,21 @@ async function boot() {
 
   ready = true;
   deps.ready = true;
+
+  installStorefrontCartGuard({
+    evaluate: (raw) => evaluateVariantAdd(raw, deps),
+    onBlocked: (decision) => {
+      renderReview({
+        kind: "rejected",
+        reason: decision.reason,
+        message: decision.message,
+      });
+      dispatch(EVENTS.rejected, {
+        userErrors: [{ code: "INVALID", field: decision.field, message: decision.message }],
+        detail: { food_disclosure: { reason_code: decision.reason } },
+      });
+    },
+  });
 
   if (typeof document.modelContext?.registerTool !== "function") {
     renderReview({ kind: "unsupported" });

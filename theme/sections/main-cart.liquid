@@ -52,6 +52,7 @@
               <a
                 class="cart-line__step"
                 href="{{ routes.cart_change_url }}?line={{ forloop.index }}&amp;quantity={{ item.quantity | plus: 1 }}"
+                data-cart-increase="{{ item.variant_id }}"
                 aria-label="{{ 'cart.increase' | t: title: item.product.title }}"
               >
                 +

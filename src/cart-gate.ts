@@ -38,7 +38,7 @@ const RECOVERY_STALE =
 const RECOVERY_LINE =
   "This cart line could not be associated with a product version retrieved in this tab. Remove or decrease it, or retrieve the product again before an increase.";
 const RECOVERY_UNAVAILABLE =
-  "The disclosure gate is not active in this browser. Human cart controls still work. Do not assume retrieval is required or recorded.";
+  "The disclosure gate is not active in this browser. Do not assume retrieval is required or recorded.";
 
 function currentQty(cart: CartSummary, lineId: string): number | undefined {
   return cart.lines.find((line) => line.id === lineId)?.quantity;
@@ -140,7 +140,6 @@ async function evaluateLine(
       };
     }
     if (quantity === 0 || quantity < existing) return { ok: true };
-    if (quantity === existing) return { ok: true };
     return requireReceiptForVariant(
       lineMap.get(cartLineId) ?? cart.lines.find((l) => l.id === cartLineId)?.merchandiseId,
       deps,
@@ -231,6 +230,27 @@ async function requireReceiptForVariant(
   return { ok: true };
 }
 
+export async function evaluateVariantAdd(raw: string, deps: GateDeps): Promise<GateDecision> {
+  if (!deps.ready) {
+    return {
+      ok: false,
+      reason: "DISCLOSURE_GATE_UNAVAILABLE",
+      field: ["id"],
+      message: RECOVERY_UNAVAILABLE,
+    };
+  }
+  const resolved = resolveAddTarget(raw, deps.registry);
+  if (!resolved) {
+    return {
+      ok: false,
+      reason: "UNKNOWN_PRODUCT_VARIANT",
+      field: ["id"],
+      message: RECOVERY_RETRIEVE,
+    };
+  }
+  return requireReceiptForVariant(resolved.variantId, deps, ["id"], false);
+}
+
 export function reconcileLineMap(
   storage: Storage,
   before: CartSummary,
@@ -300,22 +320,22 @@ export async function handleUpdateCart(
     }
     const safeCart = cart ?? EMPTY_CART;
 
-    const hasIncrease = (normalized.lines ?? []).some((line) => {
+    const needsReceipt = (normalized.lines ?? []).some((line) => {
       if (line.merchandiseId && !isCartLineGid(line.id)) return true;
       if ((line.handle || line.query) && !isCartLineGid(line.id)) return true;
       if (line.id && !isCartLineGid(line.id)) return true;
       if (line.id && isCartLineGid(line.id)) {
         const existing = currentQty(safeCart, line.id) ?? 0;
-        return (line.quantity ?? 1) > existing;
+        return (line.quantity ?? 1) >= existing && (line.quantity ?? 1) > 0;
       }
       return false;
     });
 
-    if (!deps.ready && hasIncrease) {
+    if (!deps.ready && needsReceipt) {
       return reject(safeCart, "DISCLOSURE_GATE_UNAVAILABLE", ["lines"], RECOVERY_UNAVAILABLE);
     }
 
-    if (!hasIncrease) {
+    if (!needsReceipt) {
       return defaultHandler();
     }
 

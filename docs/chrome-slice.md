@@ -30,7 +30,7 @@ To run a tool in that pane: click the tool name, fill the fields, click **Run to
 6. Repeat with add by product handle if the inspector exposes that form.
 7. Repeat with add by search query if the inspector exposes that form.
 8. Open another page in the same tab. Receipt and review state stay correct.
-9. Human Add to cart, remove, and quantity decrease still work.
+9. Add on the product form without retrieval must not change the cart. After retrieval, Add, remove, and quantity decrease still work.
 10. Checkout is not part of the demo.
 
 Harbor Salt Potato Chips has `label_statements: []`. Hillpath Trail Mix has `label_statements: null`.

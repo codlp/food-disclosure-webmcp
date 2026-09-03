@@ -3,6 +3,7 @@ import { parseRegistry } from "../src/disclosures";
 import { createReceiptStore } from "../src/receipts";
 import {
   evaluatePayload,
+  evaluateVariantAdd,
   handleUpdateCart,
   resetCartQueue,
   serializeCartCall,
@@ -186,6 +187,54 @@ describe("cart gate", () => {
     );
     expect(down.ok).toBe(true);
     expect(remove.ok).toBe(true);
+  });
+
+  it("rejects keeping an existing cart line without a receipt", async () => {
+    const { registry, receipts, storage } = deps();
+    const cart: CartSummary = {
+      ...EMPTY_CART,
+      totalQuantity: 1,
+      lines: [
+        {
+          id: "gid://shopify/CartLine/1",
+          quantity: 1,
+          cost: { totalAmount: { amount: "4.50", currencyCode: "USD" } },
+          merchandiseId: "gid://shopify/ProductVariant/11",
+        },
+      ],
+    };
+    const decision = await evaluatePayload(
+      { lines: [{ id: "gid://shopify/CartLine/1", quantity: 1 }] },
+      cart,
+      { registry, receipts, storage },
+    );
+    expect(decision.ok).toBe(false);
+    if (!decision.ok) expect(decision.reason).toBe("DISCLOSURE_RETRIEVAL_REQUIRED");
+  });
+
+  it("does not treat an existing cart line as a disclosure receipt", async () => {
+    const { registry, receipts, storage } = deps();
+    const cart: CartSummary = {
+      ...EMPTY_CART,
+      totalQuantity: 1,
+      lines: [
+        {
+          id: "gid://shopify/CartLine/1",
+          quantity: 1,
+          cost: { totalAmount: { amount: "4.50", currencyCode: "USD" } },
+          merchandiseId: "gid://shopify/ProductVariant/11",
+        },
+      ],
+    };
+    const defaultHandler = vi.fn(async () => ({ cart }) as UpdateCartResult);
+    const result = await handleUpdateCart(
+      defaultHandler,
+      { lines: [{ id: "gid://shopify/CartLine/1", quantity: 1 }] },
+      undefined,
+      { registry, receipts, storage, getCart: async () => cart, ready: true },
+    );
+    expect(defaultHandler).not.toHaveBeenCalled();
+    expect(result.userErrors?.[0]?.message).toMatch(/get_product_food_disclosures/);
   });
 
   it("accepts a UCP add by Product GID after retrieval and rewrites item.id to a variant", async () => {
@@ -416,5 +465,33 @@ describe("cart gate", () => {
       ),
     ).rejects.toBeTruthy();
     expect(defaultHandler).not.toHaveBeenCalled();
+  });
+});
+
+describe("storefront add", () => {
+  it("rejects the ordinary Add control without a receipt", async () => {
+    const { registry, receipts, storage } = deps();
+    const decision = await evaluateVariantAdd("11", {
+      registry,
+      receipts,
+      storage,
+      getCart: async () => EMPTY_CART,
+      ready: true,
+    });
+    expect(decision.ok).toBe(false);
+    if (!decision.ok) expect(decision.reason).toBe("DISCLOSURE_RETRIEVAL_REQUIRED");
+  });
+
+  it("accepts the ordinary Add control after retrieval", async () => {
+    const { registry, receipts, storage } = deps();
+    await receipts.issue(sample);
+    const decision = await evaluateVariantAdd("11", {
+      registry,
+      receipts,
+      storage,
+      getCart: async () => EMPTY_CART,
+      ready: true,
+    });
+    expect(decision.ok).toBe(true);
   });
 });
