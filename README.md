@@ -18,17 +18,19 @@ There are several issues with this:
 
 ## Vision
 
-AI enabling agent-led online shopping is one thing. It would be better if that actually included people who have to read the pack.
-
-The hope is simple: the agent still does the shopping, but it has to retrieve the merchant’s current ingredients and label statements first, including when the merchant did not supply a field. Missing should stay visible. The store does not decide whether a product is suitable. The shopper’s restrictions stay with the shopper, and with their agent. If we get that right, this kind of shopping can become less exhausting for people who already spend their time in stores reading labels.
+The idea is to make it easier for people with dietary restrictions or severe allergies to shop online with AI agents. How? By giving these AI agents access to the product's full list of ingredients and disclosures so it can make an informed and safe purchased decision. 
 
 ## Solution
 
-Maple & Sage is a working grocery storefront for that idea. An agent can search the shelf and build a basket, the same way it would in any online shop, but it cannot add a line until it has retrieved the pack facts for that product.
+Maple & Sage is a working grocery storefront where this idea, Label Check, is live.
 
-Those facts are the merchant’s current ingredients and label statements, including `null` when the merchant did not supply a field. Missing stays visible. It is not treated as “none.” After that retrieval, the native cart path can increase. If the agent skips it, the cart does not change.
+Label Check makes an agent retrieve a product’s ingredients and label statements before it can add that product to the cart. Maple & Sage is the grocery shop where that rule is live.
 
-A person in the shop can still use the ordinary Add button. The store does not decide whether a snack is suitable. The shopper names the restrictions, the merchant supplies the facts, and the shopper’s agent compares them.
+An agent can search through the product catalog and build a cart the same way it would on any online store. What it has to retrieve is the ingredients and the label statements, including when a field is missing. "null" is not the same as an empty list and it is not treated as "none".
+
+Alongside the agent’s WebMCP path, the client can still use the ordinary "add" button to add products to their cart.
+
+The store never decides whether a product is suitable. The client lists their restrictions for their AI agent, the merchant supplies the facts (ingredients and label information), and the AI agent compares them to make a decision.
 
 ## Try it
 
