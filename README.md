@@ -2,19 +2,19 @@
 
 ## Problem
 
-Great news: AI made so much progress in the last few months that we can now have agents shop online for us.
+Great news: AI made so much progress in the last few months that we can now **have agents shop online for us**.
 
-Unfortunately, for people with dietary restrictions (gluten free, dairy free, vegan, etc.) or with severe allergies, this agent-led online shopping is not yet possible.
+Unfortunately, for people with **dietary restrictions** (gluten free, dairy free, vegan, etc.) or with **severe allergies**, this agent-led online shopping is **not yet possible**.
 
 Why?
 
-Because what an agent treats as gluten free, dairy free, or nut free is often only what showed up in the product title or description. If the listing says “gluten free,” the agent is likely to treat that as the answer and move on. It does not automatically read the pack the way a person would.
+Because what an agent treats as gluten free, dairy free, or nut free is often only what showed up in the product title or description. If the listing says “gluten free”, the agent is likely to treat that as the answer and move on. It does not automatically read the pack the way a person would.
 
 There are several issues with this:
 
-- Human mistakes: a product can be presented as gluten free in the listing and still have a thickening ingredient that contains gluten. An agent that only reads the title will miss that.
-- Missing information: products that are not labelled gluten free in the title, but actually are, get ignored by the agent. The shopper misses options they could have bought. The merchant misses the sale.
-- Cross-contact: if you know someone with a dietary restriction, you know they don’t only read the ingredients. They also check the “may contain” / “made in a facility” lines very carefully. A gluten-free recipe prepared in a factory that also handles gluten is a different situation for someone with celiac disease. Same idea for a product with no seafood in the ingredients, made in a factory that also processes seafood. An agent that never retrieves those lines is not shopping the way they shop.
+- **Human mistakes**: a product can be presented as gluten free in the listing and still have a thickening ingredient that contains gluten. An agent that only reads the title will miss that.
+- **Missing information**: products that are not labelled gluten free in the title, but actually are, get ignored by the agent. The shopper misses options they could have bought. The merchant misses the sale.
+- **Cross-contact**: if you know someone with a dietary restriction, you know they don’t only read the ingredients. They also check the “may contain” / “made in a facility” lines very carefully. A gluten-free recipe prepared in a factory that also handles gluten is a different situation for someone with celiac disease. Same idea for a product with no seafood in the ingredients, made in a factory that also processes seafood. An agent that never retrieves those lines is not shopping the way they shop.
 
 ## Vision
 
